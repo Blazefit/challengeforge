@@ -15,19 +15,31 @@ export default async function AdminLayout({
     redirect("/auth/signup");
   }
 
+  // Sign out action
+  async function signOut() {
+    "use server";
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    redirect("/auth/signup");
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <span className="text-xl font-bold text-red-600">ChallengeForge</span>
-          <div className="flex gap-6 text-sm">
+          <a href="/admin/dashboard" className="text-xl font-bold text-red-600">ChallengeForge</a>
+          <div className="flex items-center gap-6 text-sm">
             <a href="/admin/dashboard" className="text-gray-700 hover:text-red-600">Dashboard</a>
+            <a href="/admin/challenges/new" className="text-gray-700 hover:text-red-600">New Challenge</a>
             <a href="/admin/participants" className="text-gray-700 hover:text-red-600">Participants</a>
             <a href="/admin/leaderboard" className="text-gray-700 hover:text-red-600">Leaderboard</a>
             <a href="/admin/checkins" className="text-gray-700 hover:text-red-600">Check-Ins</a>
             <a href="/admin/communications" className="text-gray-700 hover:text-red-600">Comms</a>
             <a href="/admin/marketing" className="text-gray-700 hover:text-red-600">Marketing</a>
             <a href="/admin/settings" className="text-gray-700 hover:text-red-600">Settings</a>
+            <form action={signOut}>
+              <button type="submit" className="text-gray-400 hover:text-red-600">Sign Out</button>
+            </form>
           </div>
         </div>
       </nav>
