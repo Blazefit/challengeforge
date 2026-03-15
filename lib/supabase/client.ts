@@ -1,17 +1,20 @@
 import { createBrowserClient } from "@supabase/ssr";
 
+let client: ReturnType<typeof createBrowserClient> | null = null;
+
 export function createClient() {
+  if (client) return client;
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    // Return a dummy client during build time when env vars are not set.
-    // This prevents build failures for client components.
-    return createBrowserClient(
-      "https://placeholder.supabase.co",
-      "placeholder-anon-key"
-    );
-  }
+  client = createBrowserClient(
+    supabaseUrl || "https://placeholder.supabase.co",
+    supabaseAnonKey || "placeholder-anon-key",
+    {
+      isSingleton: true,
+    }
+  );
 
-  return createBrowserClient(supabaseUrl, supabaseAnonKey);
+  return client;
 }
