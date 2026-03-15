@@ -140,7 +140,6 @@ Let us make these 8 weeks count.
 // -------------------------------------------------------------------
 
 export default function CommsHub({
-  challengeName,
   tracks,
   tiers,
   participants,
