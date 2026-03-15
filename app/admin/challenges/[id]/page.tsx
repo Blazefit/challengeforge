@@ -63,7 +63,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ id: 
   const tiers = challenge.tiers ?? [];
 
   // Compute spots remaining per track
-  const trackSpots = tracks.map((t: any) => {
+  const trackSpots = tracks.map((t: { id: string; name: string; icon: string; capacity: number | null }) => {
     const enrolled = (participants ?? []).filter((p) => p.track_id === t.id).length;
     return { name: t.name, icon: t.icon, capacity: t.capacity, enrolled };
   });
@@ -129,7 +129,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ id: 
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
           <p className="text-sm text-gray-500 mb-1">Spots by Track</p>
           <div className="space-y-1 mt-1">
-            {trackSpots.map((t: any) => (
+            {trackSpots.map((t) => (
               <div key={t.name} className="flex items-center justify-between text-sm">
                 <span className="text-gray-700">{t.icon} {t.name}</span>
                 <span className="text-gray-500">
@@ -152,7 +152,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ id: 
               <thead>
                 <tr>
                   <th className="text-left py-2 px-3 text-gray-500 font-medium">Track</th>
-                  {tiers.map((tier: any) => (
+                  {tiers.map((tier: { id: string; name: string }) => (
                     <th key={tier.id} className="text-center py-2 px-3 text-gray-500 font-medium">
                       {tier.name}
                     </th>
@@ -161,9 +161,9 @@ export default async function ChallengePage({ params }: { params: Promise<{ id: 
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {tracks.map((track: any) => {
+                {tracks.map((track: { id: string; name: string; icon: string }) => {
                   const rowTotal = tiers.reduce(
-                    (sum: number, tier: any) => sum + (enrollmentMatrix[track.id]?.[tier.id] ?? 0),
+                    (sum: number, tier: { id: string }) => sum + (enrollmentMatrix[track.id]?.[tier.id] ?? 0),
                     0
                   );
                   return (
@@ -171,7 +171,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ id: 
                       <td className="py-2 px-3 font-medium text-gray-900">
                         {track.icon} {track.name}
                       </td>
-                      {tiers.map((tier: any) => (
+                      {tiers.map((tier: { id: string }) => (
                         <td key={tier.id} className="text-center py-2 px-3 text-gray-700">
                           {enrollmentMatrix[track.id]?.[tier.id] ?? 0}
                         </td>

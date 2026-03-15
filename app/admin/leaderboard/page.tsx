@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { computeLeaderboard } from "@/lib/scoring";
 import LeaderboardView from "./LeaderboardView";
+import Link from "next/link";
 
 export default async function AdminLeaderboard() {
   const supabase = await createClient();
@@ -41,12 +42,12 @@ export default async function AdminLeaderboard() {
           <p className="text-gray-400 mb-4">
             No challenge found. Create a challenge first.
           </p>
-          <a
+          <Link
             href="/admin/challenges/new"
             className="inline-block bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
           >
             Create Challenge
-          </a>
+          </Link>
         </div>
       </div>
     );

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 
 export default async function AdminLayout({
   children,
@@ -27,16 +28,16 @@ export default async function AdminLayout({
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <a href="/admin/dashboard" className="text-xl font-bold text-red-600">ChallengeForge</a>
+          <Link href="/admin/dashboard" className="text-xl font-bold text-red-600">ChallengeForge</Link>
           <div className="flex items-center gap-6 text-sm">
-            <a href="/admin/dashboard" className="text-gray-700 hover:text-red-600">Dashboard</a>
-            <a href="/admin/challenges/new" className="text-gray-700 hover:text-red-600">New Challenge</a>
-            <a href="/admin/participants" className="text-gray-700 hover:text-red-600">Participants</a>
-            <a href="/admin/leaderboard" className="text-gray-700 hover:text-red-600">Leaderboard</a>
-            <a href="/admin/checkins" className="text-gray-700 hover:text-red-600">Check-Ins</a>
-            <a href="/admin/communications" className="text-gray-700 hover:text-red-600">Comms</a>
-            <a href="/admin/marketing" className="text-gray-700 hover:text-red-600">Marketing</a>
-            <a href="/admin/settings" className="text-gray-700 hover:text-red-600">Settings</a>
+            <Link href="/admin/dashboard" className="text-gray-700 hover:text-red-600">Dashboard</Link>
+            <Link href="/admin/challenges/new" className="text-gray-700 hover:text-red-600">New Challenge</Link>
+            <Link href="/admin/participants" className="text-gray-700 hover:text-red-600">Participants</Link>
+            <Link href="/admin/leaderboard" className="text-gray-700 hover:text-red-600">Leaderboard</Link>
+            <Link href="/admin/checkins" className="text-gray-700 hover:text-red-600">Check-Ins</Link>
+            <Link href="/admin/communications" className="text-gray-700 hover:text-red-600">Comms</Link>
+            <Link href="/admin/marketing" className="text-gray-700 hover:text-red-600">Marketing</Link>
+            <Link href="/admin/settings" className="text-gray-700 hover:text-red-600">Settings</Link>
             <form action={signOut}>
               <button type="submit" className="text-gray-400 hover:text-red-600">Sign Out</button>
             </form>

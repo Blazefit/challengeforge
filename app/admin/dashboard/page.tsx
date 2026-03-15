@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -24,12 +25,12 @@ export default async function AdminDashboard() {
             <p className="text-gray-500 mt-1">Welcome back, {gym.name}</p>
           )}
         </div>
-        <a
+        <Link
           href="/admin/challenges/new"
           className="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
         >
           + New Challenge
-        </a>
+        </Link>
       </div>
 
       {!gym && (
@@ -38,12 +39,12 @@ export default async function AdminDashboard() {
           <p className="text-yellow-700 text-sm mb-3">
             Finish setting up your gym profile to get started.
           </p>
-          <a
+          <Link
             href="/admin/onboarding"
             className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors"
           >
             Complete Onboarding
-          </a>
+          </Link>
         </div>
       )}
 
@@ -56,17 +57,17 @@ export default async function AdminDashboard() {
         {!challenges || challenges.length === 0 ? (
           <div className="px-6 py-12 text-center">
             <p className="text-gray-400 mb-4">No challenges yet. Create your first one!</p>
-            <a
+            <Link
               href="/admin/challenges/new"
               className="inline-block bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
             >
               Create Challenge
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
             {challenges.map((c) => (
-              <a
+              <Link
                 key={c.id}
                 href={`/admin/challenges/${c.id}`}
                 className="block px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
@@ -88,7 +89,7 @@ export default async function AdminDashboard() {
                 >
                   {c.status}
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
         )}

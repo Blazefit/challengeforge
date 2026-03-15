@@ -47,9 +47,6 @@ export default async function ParticipantDetail({
       : null;
 
   const startingWeight = intake?.weight != null ? Number(intake.weight) : null;
-  const checkinsSorted = [...allCheckins].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
   const latestCheckinWithWeight = [...allCheckins].find(
     (c) => c.weight != null
   );
