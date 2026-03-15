@@ -19,35 +19,41 @@ export default function AuthPage() {
     setLoading(true);
     setError(null);
 
-    const { data, error: signupError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { gym_name: gymName },
-      },
-    });
-
-    if (signupError) {
-      setError(signupError.message);
-      setLoading(false);
-      return;
-    }
-
-    // Create gym record
-    if (data.user) {
-      const { error: gymError } = await supabase.from("gyms").insert({
-        email: data.user.email,
-        name: gymName,
+    try {
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { gym_name: gymName },
+        },
       });
 
-      if (gymError) {
-        setError(gymError.message);
+      if (signupError) {
+        setError(signupError.message);
         setLoading(false);
         return;
       }
-    }
 
-    router.push("/admin/onboarding");
+      // Create gym record
+      if (data.user) {
+        const { error: gymError } = await supabase.from("gyms").insert({
+          email: data.user.email,
+          name: gymName,
+        });
+
+        if (gymError) {
+          setError(gymError.message);
+          setLoading(false);
+          return;
+        }
+      }
+
+      router.push("/admin/onboarding");
+    } catch {
+      setError("Connection error. Please try again.");
+      setLoading(false);
+      return;
+    }
   }
 
   async function handleLogin(e: React.FormEvent) {
@@ -55,18 +61,24 @@ export default function AuthPage() {
     setLoading(true);
     setError(null);
 
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (loginError) {
-      setError(loginError.message);
+      if (loginError) {
+        setError(loginError.message);
+        setLoading(false);
+        return;
+      }
+
+      router.push("/admin/dashboard");
+    } catch {
+      setError("Connection error. Please try again.");
       setLoading(false);
       return;
     }
-
-    router.push("/admin/dashboard");
   }
 
   return (
