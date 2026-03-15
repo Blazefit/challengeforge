@@ -129,7 +129,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ id: 
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
           <p className="text-sm text-gray-500 mb-1">Spots by Track</p>
           <div className="space-y-1 mt-1">
-            {trackSpots.map((t) => (
+            {trackSpots.map((t: { name: string; icon: string; enrolled: number; capacity: number | null }) => (
               <div key={t.name} className="flex items-center justify-between text-sm">
                 <span className="text-gray-700">{t.icon} {t.name}</span>
                 <span className="text-gray-500">
