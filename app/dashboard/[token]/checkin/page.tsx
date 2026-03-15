@@ -1,15 +1,68 @@
-export default async function CheckIn({
+import { getParticipantByToken } from "@/lib/participant";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { notFound } from "next/navigation";
+import CheckinForm from "./CheckinForm";
+
+export default async function CheckInPage({
   params,
 }: {
   params: Promise<{ token: string }>;
 }) {
-  await params;
+  const { token } = await params;
+  const participant = await getParticipantByToken(token);
+  if (!participant) notFound();
+
+  const supabase = createAdminClient();
+  const track = participant.tracks as { name: string; icon: string; color: string } | null;
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
+  // Get today's existing checkin if any
+  const { data: existing } = await supabase
+    .from("checkins")
+    .select("*")
+    .eq("participant_id", participant.id)
+    .eq("date", today)
+    .single();
+
+  // Get last weight for reference
+  const { data: lastCheckin } = await supabase
+    .from("checkins")
+    .select("weight")
+    .eq("participant_id", participant.id)
+    .not("weight", "is", null)
+    .order("date", { ascending: false })
+    .limit(1)
+    .single();
+
+  const intake = participant.intake_pre as { weight?: number } | null;
+  const lastWeight = lastCheckin?.weight || intake?.weight || null;
+  const isLastTenTrack = track?.name === "Last 10";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-lg mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-4">Daily Check-In</h1>
-        <p className="text-gray-500">Check-in form — coming soon</p>
+    <div className="min-h-screen bg-gray-950 text-white">
+      <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-4 py-4 border-b border-gray-800">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          <div>
+            <p className="text-gray-400 text-sm">Daily Check-in</p>
+            <p className="text-xs text-gray-500">{today}</p>
+          </div>
+          <a href={`/dashboard/${token}`} className="text-gray-400 text-sm hover:text-white">&larr; Dashboard</a>
+        </div>
+      </div>
+      <div className="max-w-lg mx-auto px-4 py-6">
+        <CheckinForm
+          token={token}
+          lastWeight={lastWeight}
+          showSteps={isLastTenTrack}
+          existing={existing ? {
+            weight: existing.weight,
+            protein_hit: existing.protein_hit,
+            trained: existing.trained,
+            steps: existing.steps,
+            recovery_score: existing.recovery_score,
+            notes: existing.notes,
+          } : null}
+        />
       </div>
     </div>
   );

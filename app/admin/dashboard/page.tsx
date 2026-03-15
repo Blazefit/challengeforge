@@ -66,7 +66,11 @@ export default async function AdminDashboard() {
         ) : (
           <div className="divide-y divide-gray-100">
             {challenges.map((c) => (
-              <div key={c.id} className="px-6 py-4 flex items-center justify-between">
+              <a
+                key={c.id}
+                href={`/admin/challenges/${c.id}`}
+                className="block px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
                 <div>
                   <h3 className="font-medium text-gray-900">{c.name}</h3>
                   <p className="text-sm text-gray-500">
@@ -84,7 +88,7 @@ export default async function AdminDashboard() {
                 >
                   {c.status}
                 </span>
-              </div>
+              </a>
             ))}
           </div>
         )}
