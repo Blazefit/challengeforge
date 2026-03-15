@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import GeneratePlanButton from "./GeneratePlanButton";
 
 export default async function ParticipantDetail({
   params,
@@ -103,6 +104,14 @@ export default async function ParticipantDetail({
         >
           {participant.status}
         </span>
+      </div>
+
+      {/* Generate Plan Button */}
+      <div className="mb-8">
+        <GeneratePlanButton
+          participantId={participant.id}
+          hasPlan={!!participant.ai_nutrition_plan}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -220,30 +229,54 @@ export default async function ParticipantDetail({
       )}
 
       {/* AI Plans */}
-      {participant.ai_nutrition_plan && (
-        <details className="bg-white rounded-xl border border-gray-200 shadow-sm mb-6 group">
-          <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors">
-            AI Nutrition Plan
-          </summary>
-          <div className="px-6 pb-6 text-sm text-gray-700 whitespace-pre-wrap border-t border-gray-100 pt-4">
-            {typeof participant.ai_nutrition_plan === "string"
-              ? participant.ai_nutrition_plan
-              : JSON.stringify(participant.ai_nutrition_plan, null, 2)}
-          </div>
-        </details>
-      )}
+      {participant.ai_nutrition_plan || participant.ai_training_plan ? (
+        <>
+          {participant.ai_nutrition_plan && (
+            <details
+              open
+              className="bg-white rounded-xl border border-gray-200 shadow-sm mb-6 group"
+            >
+              <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors">
+                AI Nutrition Plan
+              </summary>
+              <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                <div className="whitespace-pre-wrap">
+                  {typeof participant.ai_nutrition_plan === "string"
+                    ? participant.ai_nutrition_plan
+                    : JSON.stringify(participant.ai_nutrition_plan, null, 2)}
+                </div>
+              </div>
+            </details>
+          )}
 
-      {participant.ai_training_plan && (
-        <details className="bg-white rounded-xl border border-gray-200 shadow-sm mb-8 group">
-          <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors">
-            AI Training Plan
-          </summary>
-          <div className="px-6 pb-6 text-sm text-gray-700 whitespace-pre-wrap border-t border-gray-100 pt-4">
-            {typeof participant.ai_training_plan === "string"
-              ? participant.ai_training_plan
-              : JSON.stringify(participant.ai_training_plan, null, 2)}
-          </div>
-        </details>
+          {participant.ai_training_plan && (
+            <details
+              open
+              className="bg-white rounded-xl border border-gray-200 shadow-sm mb-8 group"
+            >
+              <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors">
+                AI Training Plan
+              </summary>
+              <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                <div className="whitespace-pre-wrap">
+                  {typeof participant.ai_training_plan === "string"
+                    ? participant.ai_training_plan
+                    : JSON.stringify(participant.ai_training_plan, null, 2)}
+                </div>
+              </div>
+            </details>
+          )}
+        </>
+      ) : (
+        <div className="bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-8 mb-8 text-center">
+          <p className="text-gray-500 mb-4">
+            No AI plan has been generated for this participant yet.
+          </p>
+          <GeneratePlanButton
+            participantId={participant.id}
+            hasPlan={false}
+          />
+        </div>
       )}
 
       {/* Check-in History */}
