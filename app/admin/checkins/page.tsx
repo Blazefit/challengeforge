@@ -137,6 +137,7 @@ export default async function CoachCheckins() {
                   <th className="px-6 py-3 font-medium">Steps</th>
                   <th className="px-6 py-3 font-medium">Recovery</th>
                   <th className="px-6 py-3 font-medium">Notes</th>
+                  <th className="px-6 py-3 font-medium">AI Feedback</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -187,6 +188,15 @@ export default async function CoachCheckins() {
                       </td>
                       <td className="px-6 py-3 text-gray-500 max-w-[200px] truncate">
                         {c.notes || "--"}
+                      </td>
+                      <td className="px-6 py-3">
+                        {c.ai_feedback ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            ✓ Sent
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
                       </td>
                     </tr>
                   );

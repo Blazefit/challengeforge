@@ -323,6 +323,7 @@ export default async function ParticipantDashboard({
 
         {/* Nav */}
         <div className="flex gap-3">
+          <Link href={`/dashboard/${token}/progress`} className="flex-1 text-center py-3 bg-gray-800 rounded-xl text-sm text-gray-300 hover:bg-gray-700">My Progress</Link>
           <Link href={`/dashboard/${token}/leaderboard`} className="flex-1 text-center py-3 bg-gray-800 rounded-xl text-sm text-gray-300 hover:bg-gray-700">Leaderboard</Link>
           <Link href={`/dashboard/${token}/checkin`} className="flex-1 text-center py-3 bg-gray-800 rounded-xl text-sm text-gray-300 hover:bg-gray-700">Check In</Link>
         </div>

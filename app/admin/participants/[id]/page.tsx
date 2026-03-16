@@ -196,11 +196,15 @@ export default async function ParticipantDetail({
                 </p>
                 <p
                   className={`text-2xl font-bold ${
-                    weightChange < 0
+                    weightChange === 0
+                      ? "text-gray-600"
+                      : participant.tracks?.name === "Hard Gainer"
+                      ? weightChange > 0
+                        ? "text-green-600"
+                        : "text-red-600"
+                      : weightChange < 0
                       ? "text-green-600"
-                      : weightChange > 0
-                      ? "text-red-600"
-                      : "text-gray-600"
+                      : "text-red-600"
                   }`}
                 >
                   {weightChange > 0 ? "+" : ""}

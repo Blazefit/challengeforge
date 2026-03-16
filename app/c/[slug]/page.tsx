@@ -286,6 +286,9 @@ export default function PublicSignup() {
               <p><strong className="text-gray-300">Tier:</strong> {selectedTier?.name} (${(selectedTier?.price_cents || 0) / 100})</p>
               <p><strong className="text-gray-300">Starts:</strong> {challenge.start_date}</p>
             </div>
+            <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-xl p-4 mt-4 text-sm text-yellow-200/80">
+              <strong className="text-yellow-200">Payment:</strong> You&apos;ll be invoiced through your Wodify account. No payment needed at signup.
+            </div>
             {magicLink && <a href={magicLink} className="inline-block mt-6 px-8 py-3 bg-red-600 rounded-lg font-medium hover:bg-red-700 transition-colors">Go to My Dashboard</a>}
           </div>
         )}
