@@ -137,6 +137,10 @@ export default async function ParticipantDetail({
       <AiReadiness
         intake={participant.intake_pre as Record<string, unknown> | null}
         tierName={(participant.tiers as { name: string } | null)?.name ?? null}
+        participantName={participant.name}
+        participantEmail={participant.email}
+        trackName={(participant.tracks as { name: string } | null)?.name ?? null}
+        dashboardToken={participant.magic_link_token ?? null}
       />
 
       {/* Generate Plan Button */}
