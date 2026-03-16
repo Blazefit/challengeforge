@@ -28,6 +28,82 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+function WeightChart({
+  dataPoints,
+  goalWeight,
+  gainIsGood,
+}: {
+  dataPoints: { date: string; weight: number }[];
+  goalWeight: number | null;
+  gainIsGood: boolean;
+}) {
+  if (dataPoints.length < 2) return null;
+
+  const width = 400;
+  const height = 160;
+  const pad = { top: 20, right: 10, bottom: 30, left: 45 };
+  const chartW = width - pad.left - pad.right;
+  const chartH = height - pad.top - pad.bottom;
+
+  const weights = dataPoints.map((d) => d.weight);
+  const allWeights = goalWeight ? [...weights, goalWeight] : weights;
+  const minW = Math.min(...allWeights) - 1;
+  const maxW = Math.max(...allWeights) + 1;
+  const range = maxW - minW || 1;
+
+  const x = (i: number) => pad.left + (i / (dataPoints.length - 1)) * chartW;
+  const y = (w: number) => pad.top + chartH - ((w - minW) / range) * chartH;
+
+  const pathD = dataPoints
+    .map((d, i) => `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${y(d.weight).toFixed(1)}`)
+    .join(" ");
+
+  // Area fill
+  const areaD = pathD + ` L ${x(dataPoints.length - 1).toFixed(1)} ${(pad.top + chartH).toFixed(1)} L ${pad.left} ${(pad.top + chartH).toFixed(1)} Z`;
+
+  const trendUp = weights[weights.length - 1] > weights[0];
+  const lineColor = (trendUp && gainIsGood) || (!trendUp && !gainIsGood) ? "#22c55e" : "#ef4444";
+
+  // Y-axis labels (3 ticks)
+  const yTicks = [minW, minW + range / 2, maxW].map((v) => Math.round(v * 10) / 10);
+
+  // X-axis labels (first, middle, last)
+  const xLabels = [0, Math.floor(dataPoints.length / 2), dataPoints.length - 1]
+    .filter((i, idx, arr) => arr.indexOf(i) === idx)
+    .map((i) => ({ i, label: formatDate(dataPoints[i].date) }));
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full" preserveAspectRatio="xMidYMid meet">
+      {/* Grid lines */}
+      {yTicks.map((tick) => (
+        <g key={tick}>
+          <line x1={pad.left} y1={y(tick)} x2={width - pad.right} y2={y(tick)} stroke="#374151" strokeWidth="0.5" />
+          <text x={pad.left - 5} y={y(tick) + 3} textAnchor="end" fill="#6b7280" fontSize="10">{tick}</text>
+        </g>
+      ))}
+      {/* Goal line */}
+      {goalWeight && goalWeight >= minW && goalWeight <= maxW && (
+        <g>
+          <line x1={pad.left} y1={y(goalWeight)} x2={width - pad.right} y2={y(goalWeight)} stroke="#facc15" strokeWidth="1" strokeDasharray="4 3" />
+          <text x={width - pad.right + 2} y={y(goalWeight) + 3} fill="#facc15" fontSize="9">Goal</text>
+        </g>
+      )}
+      {/* Area */}
+      <path d={areaD} fill={lineColor} opacity="0.1" />
+      {/* Line */}
+      <path d={pathD} fill="none" stroke={lineColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Dots */}
+      {dataPoints.map((d, i) => (
+        <circle key={i} cx={x(i)} cy={y(d.weight)} r="3" fill={lineColor} />
+      ))}
+      {/* X-axis labels */}
+      {xLabels.map(({ i, label }) => (
+        <text key={i} x={x(i)} y={height - 5} textAnchor="middle" fill="#6b7280" fontSize="9">{label}</text>
+      ))}
+    </svg>
+  );
+}
+
 function formatWeekRange(mondayStr: string): string {
   const mon = new Date(mondayStr + "T00:00:00");
   const sun = new Date(mon);
@@ -226,6 +302,49 @@ export default async function MyProgress({
             </p>
           </div>
         </div>
+
+        {/* Weight Trend Chart */}
+        {checkinsWithWeight.length >= 2 && (
+          <div className="bg-gray-900 rounded-xl p-5">
+            <h2 className="font-bold mb-4 text-lg">Weight Trend</h2>
+            <WeightChart
+              dataPoints={checkinsWithWeight.map((c) => ({ date: c.date, weight: c.weight! }))}
+              goalWeight={intake?.goal_weight ?? null}
+              gainIsGood={gainIsGood}
+            />
+          </div>
+        )}
+
+        {/* Starting Photos */}
+        {participant.starting_photos && (() => {
+          const photos = participant.starting_photos as Record<string, string>;
+          const hasPhotos = Object.values(photos).some(Boolean);
+          if (!hasPhotos) return null;
+          return (
+            <div className="bg-gray-900 rounded-xl p-5">
+              <h2 className="font-bold mb-4 text-lg">Starting Photos</h2>
+              <div className="grid grid-cols-3 gap-3">
+                {["front", "side", "back"].map((angle) => (
+                  photos[angle] ? (
+                    <div key={angle} className="text-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={photos[angle]}
+                        alt={`${angle} photo`}
+                        className="w-full aspect-[3/4] object-cover rounded-lg border border-gray-700"
+                      />
+                      <p className="text-xs text-gray-500 mt-1 capitalize">{angle}</p>
+                    </div>
+                  ) : (
+                    <div key={angle} className="flex items-center justify-center aspect-[3/4] rounded-lg border-2 border-dashed border-gray-700 bg-gray-800">
+                      <p className="text-xs text-gray-600 capitalize">{angle}</p>
+                    </div>
+                  )
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Weight History Table */}
         <div className="bg-gray-900 rounded-xl p-5">

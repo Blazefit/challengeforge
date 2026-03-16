@@ -34,9 +34,11 @@ export default async function CheckInPage({
     .limit(1)
     .single();
 
+  const tier = participant.tiers as { name: string } | null;
   const intake = participant.intake_pre as { weight?: number } | null;
   const lastWeight = lastCheckin?.weight || intake?.weight || null;
   const isLastTenTrack = track?.name === "Last 10";
+  const isElite = tier?.name?.toLowerCase() === "the elite";
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -54,6 +56,8 @@ export default async function CheckInPage({
           token={token}
           lastWeight={lastWeight}
           showSteps={isLastTenTrack}
+          isElite={isElite}
+          participantId={participant.id}
           existing={existing ? {
             weight: existing.weight,
             protein_hit: existing.protein_hit,
@@ -61,6 +65,7 @@ export default async function CheckInPage({
             steps: existing.steps,
             recovery_score: existing.recovery_score,
             notes: existing.notes,
+            meal_photo_url: existing.meal_photo_url,
           } : null}
         />
       </div>

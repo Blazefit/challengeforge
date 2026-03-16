@@ -339,17 +339,44 @@ function BroadcastComposer({
     return "All participants";
   }, [audienceMode, selectedTrackId, selectedTierId, tracks, tiers]);
 
-  function handleSend() {
+  const [sending, setSending] = useState(false);
+
+  async function handleSend() {
     if (!subject.trim() || !body.trim()) {
       setToast("Please fill in both subject and message body.");
       setTimeout(() => setToast(null), 3000);
       return;
     }
-    setToast(
-      `Messages queued for delivery to ${recipients.length} recipient${recipients.length !== 1 ? "s" : ""}`
-    );
-    setTimeout(() => setToast(null), 4000);
+
+    setSending(true);
+    try {
+      // Personalize messages per recipient
+      const recipientEmails = recipients.map((r) => r.email);
+
+      const res = await fetch("/api/comms/broadcast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject,
+          message: body,
+          recipientEmails,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setToast(`Send failed: ${data.error}`);
+      } else {
+        setToast(`Sent to ${data.count} recipient${data.count !== 1 ? "s" : ""}!`);
+        setSubject("");
+        setBody("");
+      }
+    } catch {
+      setToast("Network error — please try again.");
+    }
+    setSending(false);
     setShowPreview(false);
+    setTimeout(() => setToast(null), 4000);
   }
 
   return (
@@ -471,11 +498,12 @@ function BroadcastComposer({
           </button>
           <button
             onClick={handleSend}
-            disabled={recipients.length === 0}
+            disabled={recipients.length === 0 || sending}
             className="px-5 py-2.5 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Send to {recipients.length} Recipient
-            {recipients.length !== 1 ? "s" : ""}
+            {sending
+              ? "Sending..."
+              : `Send to ${recipients.length} Recipient${recipients.length !== 1 ? "s" : ""}`}
           </button>
         </div>
 

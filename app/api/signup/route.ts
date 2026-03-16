@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
+import { sendWelcomeEmail } from "@/lib/email";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -60,6 +61,24 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
   }
+
+  // Send welcome email (fire-and-forget — don't block signup response)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://challengeforge.vercel.app";
+  const dashboardUrl = `${appUrl}/dashboard/${data.magic_link_token}`;
+
+  // Look up track and tier names for the email
+  const { data: trackRow } = await supabase.from("tracks").select("name").eq("id", track_id).single();
+  const { data: tierRow } = await supabase.from("tiers").select("name").eq("id", tier_id).single();
+  const { data: challengeRow } = await supabase.from("challenges").select("name").eq("id", challenge_id).single();
+
+  sendWelcomeEmail({
+    to: email,
+    participantName: name,
+    trackName: trackRow?.name ?? "Challenger",
+    tierName: tierRow?.name ?? "Participant",
+    dashboardUrl,
+    challengeName: challengeRow?.name ?? "Summer Slim Down 2026",
+  }).catch((err) => console.error("Welcome email failed:", err));
 
   return NextResponse.json({ id: data.id, magic_link_token: data.magic_link_token }, { headers: corsHeaders });
 }

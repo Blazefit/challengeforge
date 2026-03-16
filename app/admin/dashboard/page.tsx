@@ -20,6 +20,7 @@ export default async function AdminDashboard() {
   // Get today's stats for the active challenge
   const activeChallenge = challenges?.find((c) => c.status === "active") ?? challenges?.[0];
   let todayStats = { enrolled: 0, checkedIn: 0, unpaid: 0, withoutPlans: 0 };
+  let atRiskParticipants: { id: string; name: string; email: string; daysMissed: number; trackName: string }[] = [];
 
   if (activeChallenge) {
     const { data: participants } = await supabase
@@ -44,6 +45,48 @@ export default async function AdminDashboard() {
       unpaid: active.filter((p) => p.payment_status !== "paid").length,
       withoutPlans: active.filter((p) => !p.ai_nutrition_plan).length,
     };
+
+    // At-risk: find participants who haven't checked in for 2+ days
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+    const twoDaysAgoStr = twoDaysAgo.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
+    // Get all participants with track info for at-risk display
+    const { data: fullParticipants } = await supabase
+      .from("participants")
+      .select("id, name, email, tracks(name)")
+      .eq("challenge_id", activeChallenge.id)
+      .eq("status", "active");
+
+    const { data: recentCheckins } = await supabase
+      .from("checkins")
+      .select("participant_id, date")
+      .in("participant_id", active.map((p) => p.id))
+      .gte("date", twoDaysAgoStr)
+      .order("date", { ascending: false });
+
+    const lastCheckinMap = new Map<string, string>();
+    (recentCheckins ?? []).forEach((c) => {
+      if (!lastCheckinMap.has(c.participant_id)) {
+        lastCheckinMap.set(c.participant_id, c.date);
+      }
+    });
+
+    atRiskParticipants = (fullParticipants ?? [])
+      .filter((p) => !lastCheckinMap.has(p.id))
+      .map((p) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const tracks = p.tracks as any;
+        const trackName = Array.isArray(tracks) ? tracks[0]?.name : tracks?.name;
+        return {
+          id: p.id,
+          name: p.name,
+          email: p.email,
+          daysMissed: 2,
+          trackName: trackName ?? "Unknown",
+        };
+      })
+      .slice(0, 10);
   }
 
   // Days until challenge starts or ends
@@ -159,6 +202,49 @@ export default async function AdminDashboard() {
             <p className="text-2xl mb-1">&#128172;</p>
             <p className="text-sm font-medium text-gray-900">Comms</p>
           </Link>
+        </div>
+      )}
+
+      {/* At-Risk Athletes */}
+      {atRiskParticipants.length > 0 && (
+        <div className="bg-white rounded-xl border border-red-200 shadow-sm mb-8">
+          <div className="px-6 py-4 border-b border-red-100 bg-red-50 rounded-t-xl">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">&#9888;&#65039;</span>
+              <h2 className="font-semibold text-red-800">
+                At-Risk Athletes ({atRiskParticipants.length})
+              </h2>
+            </div>
+            <p className="text-sm text-red-600 mt-1">
+              These participants haven&apos;t checked in for 2+ days
+            </p>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {atRiskParticipants.map((p) => (
+              <div key={p.id} className="px-6 py-3 flex items-center justify-between">
+                <div>
+                  <Link
+                    href={`/admin/participants/${p.id}`}
+                    className="font-medium text-gray-900 hover:text-red-600 transition-colors"
+                  >
+                    {p.name}
+                  </Link>
+                  <p className="text-xs text-gray-500">{p.trackName} &middot; {p.email}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
+                    {p.daysMissed}+ days missed
+                  </span>
+                  <a
+                    href={`mailto:${p.email}?subject=Missing you at the challenge!&body=Hey ${p.name.split(" ")[0]},%0A%0AWe noticed you haven't checked in for a couple days. Everything okay? Remember, even a quick check-in keeps you accountable and on track.%0A%0ALet's get back at it!`}
+                    className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+                  >
+                    Nudge
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

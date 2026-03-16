@@ -7,6 +7,8 @@ interface Props {
   token: string;
   lastWeight: number | null;
   showSteps: boolean;
+  isElite: boolean;
+  participantId: string;
   existing: {
     weight: number | null;
     protein_hit: string | null;
@@ -14,10 +16,11 @@ interface Props {
     steps: number | null;
     recovery_score: number | null;
     notes: string | null;
+    meal_photo_url: string | null;
   } | null;
 }
 
-export default function CheckinForm({ token, lastWeight, showSteps, existing }: Props) {
+export default function CheckinForm({ token, lastWeight, showSteps, isElite, participantId, existing }: Props) {
   const router = useRouter();
   const params = useParams();
   const dashToken = params.token as string;
@@ -28,6 +31,8 @@ export default function CheckinForm({ token, lastWeight, showSteps, existing }: 
   const [steps, setSteps] = useState(existing?.steps?.toString() || "");
   const [recovery, setRecovery] = useState<number | null>(existing?.recovery_score || null);
   const [notes, setNotes] = useState(existing?.notes || "");
+  const [mealPhoto, setMealPhoto] = useState<File | null>(null);
+  const [mealPhotoPreview, setMealPhotoPreview] = useState<string | null>(existing?.meal_photo_url || null);
 
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -39,6 +44,22 @@ export default function CheckinForm({ token, lastWeight, showSteps, existing }: 
     setError(null);
 
     try {
+      // Upload meal photo first if present
+      let mealPhotoUrl: string | null = existing?.meal_photo_url || null;
+      if (mealPhoto && isElite) {
+        const formData = new FormData();
+        formData.append("file", mealPhoto);
+        formData.append("participant_id", participantId);
+        const uploadRes = await fetch("/api/checkin/photo", {
+          method: "POST",
+          body: formData,
+        });
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          mealPhotoUrl = uploadData.url;
+        }
+      }
+
       const res = await fetch("/api/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,6 +71,7 @@ export default function CheckinForm({ token, lastWeight, showSteps, existing }: 
           steps: steps || null,
           recovery_score: recovery,
           notes: notes || null,
+          meal_photo_url: mealPhotoUrl,
         }),
       });
 
@@ -194,6 +216,52 @@ export default function CheckinForm({ token, lastWeight, showSteps, existing }: 
           ))}
         </div>
       </div>
+
+      {/* Meal Photo (Elite only) */}
+      {isElite && (
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">Meal Photo (optional)</label>
+          {mealPhotoPreview && (
+            <div className="mb-2 relative">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={mealPhotoPreview}
+                alt="Meal"
+                className="w-full max-h-48 object-cover rounded-xl border border-gray-700"
+              />
+              <button
+                type="button"
+                onClick={() => { setMealPhoto(null); setMealPhotoPreview(null); }}
+                className="absolute top-2 right-2 bg-gray-900/80 text-white w-7 h-7 rounded-full text-sm hover:bg-red-600 transition-colors"
+              >
+                X
+              </button>
+            </div>
+          )}
+          {!mealPhotoPreview && (
+            <label className="flex flex-col items-center justify-center w-full py-6 bg-gray-800 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-gray-500 transition-colors">
+              <svg className="w-8 h-8 text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="text-sm text-gray-500">Tap to add meal photo</span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setMealPhoto(file);
+                    setMealPhotoPreview(URL.createObjectURL(file));
+                  }
+                }}
+              />
+            </label>
+          )}
+          <p className="text-xs text-gray-600 mt-1">Your coach and AI will review your meal</p>
+        </div>
+      )}
 
       {/* Notes */}
       <div>
