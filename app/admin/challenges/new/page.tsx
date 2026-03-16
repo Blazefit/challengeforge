@@ -715,12 +715,12 @@ export default function NewChallenge() {
   const supabase = createClient();
 
   const [basics, setBasics] = useState<ChallengeBasics>({
-    name: "",
-    slug: "",
-    description: "",
-    start_date: "",
-    end_date: "",
-    early_bird_ends: "",
+    name: "Summer Slim Down 2026",
+    slug: "summer-slim-down-2026",
+    description: "An 8-week body transformation challenge at CrossFit Blaze. Three tracks — Hard Gainer, Last 10, and Transformer — with AI-personalized coaching, nutrition plans, and a grand finale Murph on May 23rd.",
+    start_date: "2026-04-01",
+    end_date: "2026-05-23",
+    early_bird_ends: "2026-03-25",
   });
 
   const [tracks, setTracks] = useState<Track[]>(DEFAULT_TRACKS);

@@ -1,130 +1,311 @@
 import { createClient } from "@/lib/supabase/server";
-import CheckinsView from "./checkins-view";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import GenerateCoachingButton from "./GenerateCoachingButton";
+import DateNav from "./DateNav";
+import QuickCheckin from "./QuickCheckin";
 
-export default async function CoachCheckinsPage() {
+export default async function CoachCheckins({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    redirect("/auth/signup");
+  }
+
+  // Get gym for this user
   const { data: gym } = await supabase
     .from("gyms")
     .select("id")
-    .eq("email", user?.email ?? "")
+    .eq("email", user.email ?? "")
     .single();
 
   if (!gym) {
-    return (
-      <div className="text-center py-16">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Check-Ins</h1>
-        <p className="text-gray-500">
-          Complete your gym setup first to view check-ins.
-        </p>
-      </div>
-    );
+    redirect("/admin/onboarding");
   }
 
-  const { data: challenges } = await supabase
+  // Get the first challenge for this gym
+  const { data: challenge } = await supabase
     .from("challenges")
     .select("id")
-    .eq("gym_id", gym.id);
+    .eq("gym_id", gym.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
 
-  const challengeIds = (challenges ?? []).map((c) => c.id);
-
-  if (challengeIds.length === 0) {
+  if (!challenge) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Check-Ins</h1>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-16 text-center">
-          <p className="text-gray-400">
-            No challenges yet. Create a challenge first.
+        <h1 className="text-2xl font-bold mb-6 text-gray-900">Check-Ins</h1>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
+          <p className="text-gray-400 mb-4">
+            No challenge found. Create a challenge first.
           </p>
+          <Link
+            href="/admin/challenges/new"
+            className="inline-block bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
+          >
+            Create Challenge
+          </Link>
         </div>
       </div>
     );
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const challengeId = challenge.id;
 
-  // Get all participants for these challenges
+  // All active participants
   const { data: participants } = await supabase
     .from("participants")
-    .select("id, name, email, track_id, tier_id, status")
-    .in("challenge_id", challengeIds)
+    .select("id, name, email, tracks(name, icon, color)")
+    .eq("challenge_id", challengeId)
     .eq("status", "active");
 
   const activeParticipants = participants ?? [];
-  const participantIds = activeParticipants.map((p) => p.id);
 
-  // Get today's checkins
-  const { data: todayCheckins } = await supabase
+  // Date from search params or today (Eastern Time)
+  const resolvedParams = await searchParams;
+  const today = resolvedParams.date || new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/New_York",
+  });
+
+  const { data: checkins } = await supabase
     .from("checkins")
-    .select("*")
-    .eq("date", today)
-    .in("participant_id", participantIds.length > 0 ? participantIds : ["none"])
-    .order("created_at", { ascending: false });
+    .select("*, participants(name, email, tracks(name, icon, color))")
+    .eq("date", today);
 
-  // Get tracks and tiers for display
-  const [tracksRes, tiersRes] = await Promise.all([
-    supabase
-      .from("tracks")
-      .select("id, name, color")
-      .in("challenge_id", challengeIds),
-    supabase
-      .from("tiers")
-      .select("id, name")
-      .in("challenge_id", challengeIds),
-  ]);
+  const todayCheckins = checkins ?? [];
+  const checkinIdsWithoutFeedback = todayCheckins
+    .filter((c) => !c.ai_feedback)
+    .map((c) => c.id);
 
-  // Get latest checkin date per participant (for at-risk calculation)
-  const latestCheckinMap: Record<string, string> = {};
-  if (participantIds.length > 0) {
-    const { data: allCheckins } = await supabase
-      .from("checkins")
-      .select("participant_id, date")
-      .in("participant_id", participantIds)
-      .order("date", { ascending: false });
-
-    if (allCheckins) {
-      for (const c of allCheckins) {
-        if (!latestCheckinMap[c.participant_id]) {
-          latestCheckinMap[c.participant_id] = c.date;
-        }
-      }
-    }
-  }
-
-  const twoDaysAgo = new Date();
-  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-  const twoDaysAgoStr = twoDaysAgo.toISOString().split("T")[0];
-
-  const atRiskIds = new Set(
-    activeParticipants
-      .filter((p) => {
-        const lastDate = latestCheckinMap[p.id];
-        if (!lastDate) return true;
-        return lastDate < twoDaysAgoStr;
-      })
-      .map((p) => p.id)
-  );
-
-  // Figure out who checked in today and who didn't
-  const checkedInIds = new Set(
-    (todayCheckins ?? []).map((c) => c.participant_id)
-  );
+  // Compute missing participants
+  const checkedInIds = new Set(todayCheckins.map((c) => c.participant_id));
   const missingParticipants = activeParticipants.filter(
     (p) => !checkedInIds.has(p.id)
   );
 
+  const checkedInCount = checkedInIds.size;
+  const missingCount = missingParticipants.length;
+  const totalActive = activeParticipants.length;
+
   return (
-    <CheckinsView
-      participants={activeParticipants}
-      todayCheckins={todayCheckins ?? []}
-      missingParticipants={missingParticipants}
-      tracks={tracksRes.data ?? []}
-      tiers={tiersRes.data ?? []}
-      atRiskIds={Array.from(atRiskIds)}
-      today={today}
-    />
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Check-Ins</h1>
+        <DateNav currentDate={today} />
+      </div>
+
+      {/* Stats Bar */}
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
+          <p className="text-sm text-gray-500 mb-1">Checked In</p>
+          <p className="text-3xl font-bold text-green-600">{checkedInCount}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
+          <p className="text-sm text-gray-500 mb-1">Missing</p>
+          <p className="text-3xl font-bold text-red-600">{missingCount}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-center">
+          <p className="text-sm text-gray-500 mb-1">Total Active</p>
+          <p className="text-3xl font-bold text-gray-900">{totalActive}</p>
+        </div>
+      </div>
+
+      {/* Quick Check-in */}
+      <QuickCheckin participants={missingParticipants.map(p => ({ id: p.id, name: p.name }))} />
+
+      {/* Today's Check-ins */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-8">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="font-semibold text-gray-800">
+            Today&apos;s Check-ins
+          </h2>
+          <GenerateCoachingButton checkinIds={checkinIdsWithoutFeedback} />
+        </div>
+
+        {todayCheckins.length === 0 ? (
+          <div className="px-6 py-12 text-center">
+            <p className="text-gray-400">No check-ins submitted today yet.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 text-left text-gray-500">
+                  <th className="px-6 py-3 font-medium">Name</th>
+                  <th className="px-6 py-3 font-medium">Track</th>
+                  <th className="px-6 py-3 font-medium">Weight</th>
+                  <th className="px-6 py-3 font-medium">Protein</th>
+                  <th className="px-6 py-3 font-medium">Trained</th>
+                  <th className="px-6 py-3 font-medium">Steps</th>
+                  <th className="px-6 py-3 font-medium">Recovery</th>
+                  <th className="px-6 py-3 font-medium">Notes</th>
+                  <th className="px-6 py-3 font-medium">AI Feedback</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {todayCheckins.map((c) => {
+                  const p = c.participants as {
+                    name: string;
+                    email: string;
+                    tracks: { name: string; icon: string; color: string } | null;
+                  } | null;
+                  const track = p?.tracks;
+
+                  return (
+                    <tr key={c.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-3 font-medium text-gray-900">
+                        {p?.name ?? "Unknown"}
+                      </td>
+                      <td className="px-6 py-3">
+                        {track ? (
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                            style={{
+                              backgroundColor: `${track.color}20`,
+                              color: track.color,
+                            }}
+                          >
+                            {track.icon} {track.name}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">--</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3 text-gray-700">
+                        {c.weight != null ? `${c.weight} lbs` : "--"}
+                      </td>
+                      <td className="px-6 py-3">
+                        <ProteinBadge value={c.protein_hit} />
+                      </td>
+                      <td className="px-6 py-3">
+                        <TrainedBadge value={c.trained} />
+                      </td>
+                      <td className="px-6 py-3 text-gray-700">
+                        {c.steps != null
+                          ? c.steps.toLocaleString()
+                          : "--"}
+                      </td>
+                      <td className="px-6 py-3">
+                        <RecoveryBadge value={c.recovery_score} />
+                      </td>
+                      <td className="px-6 py-3 text-gray-500 max-w-[200px] truncate">
+                        {c.notes || "--"}
+                      </td>
+                      <td className="px-6 py-3">
+                        {c.ai_feedback ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            ✓ Sent
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Missing Today */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="font-semibold text-gray-800">Missing Today</h2>
+        </div>
+
+        {missingParticipants.length === 0 ? (
+          <div className="px-6 py-8 text-center">
+            <p className="text-green-600 font-medium">
+              Everyone has checked in today!
+            </p>
+          </div>
+        ) : (
+          <div className="px-6 py-4">
+            <div className="flex flex-wrap gap-3">
+              {missingParticipants.map((p) => {
+                const track = (Array.isArray(p.tracks) ? p.tracks[0] : p.tracks) as {
+                  name: string;
+                  icon: string;
+                  color: string;
+                } | null;
+                return (
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2"
+                  >
+                    <span className="text-sm font-medium text-gray-700">
+                      {p.name}
+                    </span>
+                    {track && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                        style={{
+                          backgroundColor: `${track.color}20`,
+                          color: track.color,
+                        }}
+                      >
+                        {track.icon} {track.name}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProteinBadge({ value }: { value: string | null }) {
+  if (!value) return <span className="text-gray-400">--</span>;
+  const config: Record<string, { label: string; className: string }> = {
+    yes: { label: "Yes", className: "bg-green-100 text-green-700" },
+    close: { label: "Close", className: "bg-yellow-100 text-yellow-700" },
+    no: { label: "No", className: "bg-red-100 text-red-700" },
+  };
+  const c = config[value] ?? { label: value, className: "bg-gray-100 text-gray-600" };
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${c.className}`}>
+      {c.label}
+    </span>
+  );
+}
+
+function TrainedBadge({ value }: { value: string | null }) {
+  if (!value) return <span className="text-gray-400">--</span>;
+  const config: Record<string, { label: string; className: string }> = {
+    yes: { label: "Yes", className: "bg-green-100 text-green-700" },
+    rest_day: { label: "Rest Day", className: "bg-yellow-100 text-yellow-700" },
+    no: { label: "No", className: "bg-red-100 text-red-700" },
+  };
+  const c = config[value] ?? { label: value, className: "bg-gray-100 text-gray-600" };
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${c.className}`}>
+      {c.label}
+    </span>
+  );
+}
+
+function RecoveryBadge({ value }: { value: number | null }) {
+  if (value == null) return <span className="text-gray-400">--</span>;
+  let className = "bg-red-100 text-red-700";
+  if (value >= 7) className = "bg-green-100 text-green-700";
+  else if (value >= 4) className = "bg-yellow-100 text-yellow-700";
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${className}`}>
+      {value}/10
+    </span>
   );
 }

@@ -1,7 +1,7 @@
+import { getParticipantByToken } from "@/lib/participant";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import CheckinForm from "./checkin-form";
+import CheckinForm from "./CheckinForm";
 
 export default async function CheckInPage({
   params,
@@ -9,85 +9,60 @@ export default async function CheckInPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
-  const supabase = createAdminClient();
+  const participant = await getParticipantByToken(token);
+  if (!participant) notFound();
 
-  // Look up participant by magic link token
-  const { data: participant, error: pError } = await supabase
-    .from("participants")
+  const supabase = createAdminClient();
+  const track = participant.tracks as { name: string; icon: string; color: string } | null;
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
+  // Get today's existing checkin if any
+  const { data: existing } = await supabase
+    .from("checkins")
     .select("*")
-    .eq("magic_link_token", token)
+    .eq("participant_id", participant.id)
+    .eq("date", today)
     .single();
 
-  if (pError || !participant) {
-    notFound();
-  }
+  // Get last weight for reference
+  const { data: lastCheckin } = await supabase
+    .from("checkins")
+    .select("weight")
+    .eq("participant_id", participant.id)
+    .not("weight", "is", null)
+    .order("date", { ascending: false })
+    .limit(1)
+    .single();
 
-  // Fetch track, tier, and last checkin in parallel
-  const [trackRes, tierRes, lastCheckinRes] = await Promise.all([
-    supabase
-      .from("tracks")
-      .select("name")
-      .eq("id", participant.track_id)
-      .single(),
-    supabase
-      .from("tiers")
-      .select("name, ai_daily_coaching")
-      .eq("id", participant.tier_id)
-      .single(),
-    supabase
-      .from("checkins")
-      .select("weight")
-      .eq("participant_id", participant.id)
-      .order("date", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ]);
-
-  const track = trackRes.data;
-  const tier = tierRes.data;
-
-  if (!track || !tier) {
-    notFound();
-  }
-
-  const lastWeight =
-    lastCheckinRes.data?.weight || participant.intake_pre?.weight || null;
-
-  // Determine if Elite tier (has ai_daily_coaching)
-  const isElite = tier.ai_daily_coaching === true;
-
-  // Extract protein target from intake_post if available
-  const intakePost = participant.intake_post as Record<string, unknown> | null;
-  const proteinTarget =
-    intakePost && typeof intakePost.protein_target === "string"
-      ? intakePost.protein_target
-      : null;
+  const intake = participant.intake_pre as { weight?: number } | null;
+  const lastWeight = lastCheckin?.weight || intake?.weight || null;
+  const isLastTenTrack = track?.name === "Last 10";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-lg mx-auto">
-        {/* Header */}
-        <div className="bg-white border-b px-4 py-3 flex items-center gap-3">
-          <Link
-            href={`/dashboard/${token}`}
-            className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-          >
-            &larr;
-          </Link>
-          <h1 className="text-lg font-bold text-gray-900">Daily Check-In</h1>
+    <div className="min-h-screen bg-gray-950 text-white">
+      <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-4 py-4 border-b border-gray-800">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          <div>
+            <p className="text-gray-400 text-sm">Daily Check-in</p>
+            <p className="text-xs text-gray-500">{today}</p>
+          </div>
+          <a href={`/dashboard/${token}`} className="text-gray-400 text-sm hover:text-white">&larr; Dashboard</a>
         </div>
-
-        {/* Form */}
-        <div className="px-4 py-6">
-          <CheckinForm
-            token={token}
-            participantId={participant.id}
-            lastWeight={lastWeight}
-            proteinTarget={proteinTarget}
-            isElite={isElite}
-            trackName={track.name}
-          />
-        </div>
+      </div>
+      <div className="max-w-lg mx-auto px-4 py-6">
+        <CheckinForm
+          token={token}
+          lastWeight={lastWeight}
+          showSteps={isLastTenTrack}
+          existing={existing ? {
+            weight: existing.weight,
+            protein_hit: existing.protein_hit,
+            trained: existing.trained,
+            steps: existing.steps,
+            recovery_score: existing.recovery_score,
+            notes: existing.notes,
+          } : null}
+        />
       </div>
     </div>
   );
