@@ -9,6 +9,7 @@ import EditParticipant from "./EditParticipant";
 import AiReadiness from "./AiReadiness";
 import WelcomeEmail from "./WelcomeEmail";
 import AiActionButton from "./AiActionButton";
+import SendPlanEmail from "./SendPlanEmail";
 
 export default async function ParticipantDetail({
   params,
@@ -365,8 +366,14 @@ export default async function ParticipantDetail({
               open
               className="bg-white rounded-xl border border-gray-200 shadow-sm mb-6 group"
             >
-              <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors">
-                AI Nutrition Plan
+              <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                <span>AI Nutrition Plan</span>
+                <SendPlanEmail
+                  participantEmail={participant.email}
+                  participantName={participant.name}
+                  planTitle="Nutrition Plan"
+                  planContent={typeof participant.ai_nutrition_plan === "string" ? participant.ai_nutrition_plan : ""}
+                />
               </summary>
               <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
                 <div className="whitespace-pre-wrap">
@@ -383,8 +390,14 @@ export default async function ParticipantDetail({
               open
               className="bg-white rounded-xl border border-gray-200 shadow-sm mb-8 group"
             >
-              <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors">
-                AI Training Plan
+              <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                <span>AI Training Plan</span>
+                <SendPlanEmail
+                  participantEmail={participant.email}
+                  participantName={participant.name}
+                  planTitle="Training Plan"
+                  planContent={typeof participant.ai_training_plan === "string" ? participant.ai_training_plan : ""}
+                />
               </summary>
               <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
                 <div className="whitespace-pre-wrap">
@@ -431,6 +444,9 @@ export default async function ParticipantDetail({
                 </summary>
                 {participant.ai_meal_plan ? (
                   <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="mb-3">
+                      <SendPlanEmail participantEmail={participant.email} participantName={participant.name} planTitle="Custom Meal Plan" planContent={participant.ai_meal_plan} />
+                    </div>
                     <div className="whitespace-pre-wrap">{participant.ai_meal_plan}</div>
                   </div>
                 ) : (
@@ -456,6 +472,9 @@ export default async function ParticipantDetail({
                 </summary>
                 {participant.ai_workout_mod ? (
                   <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="mb-3">
+                      <SendPlanEmail participantEmail={participant.email} participantName={participant.name} planTitle="Workout Modifications" planContent={participant.ai_workout_mod} />
+                    </div>
                     <div className="whitespace-pre-wrap">{participant.ai_workout_mod}</div>
                   </div>
                 ) : (
@@ -481,6 +500,9 @@ export default async function ParticipantDetail({
                 </summary>
                 {participant.ai_weekly_analysis ? (
                   <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="mb-3">
+                      <SendPlanEmail participantEmail={participant.email} participantName={participant.name} planTitle="Weekly Analysis" planContent={participant.ai_weekly_analysis} />
+                    </div>
                     <div className="whitespace-pre-wrap">{participant.ai_weekly_analysis}</div>
                   </div>
                 ) : (
@@ -506,6 +528,9 @@ export default async function ParticipantDetail({
                 </summary>
                 {participant.ai_midprogram_adjustment ? (
                   <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="mb-3">
+                      <SendPlanEmail participantEmail={participant.email} participantName={participant.name} planTitle="Mid-Program Adjustment" planContent={participant.ai_midprogram_adjustment} />
+                    </div>
                     <div className="whitespace-pre-wrap">{participant.ai_midprogram_adjustment}</div>
                   </div>
                 ) : (
@@ -530,6 +555,9 @@ export default async function ParticipantDetail({
               </summary>
               {participant.ai_murph_prep ? (
                 <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                  <div className="mb-3">
+                    <SendPlanEmail participantEmail={participant.email} participantName={participant.name} planTitle="Murph Prep Strategy" planContent={participant.ai_murph_prep} />
+                  </div>
                   <div className="whitespace-pre-wrap">{participant.ai_murph_prep}</div>
                 </div>
               ) : (
