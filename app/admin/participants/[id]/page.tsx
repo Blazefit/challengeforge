@@ -566,6 +566,116 @@ export default async function ParticipantDetail({
                 </div>
               )}
             </details>
+
+            {/* Meal Substitution - Accelerator + Elite */}
+            {isAccelOrElite && (
+              <details className="bg-white rounded-xl border border-gray-200 shadow-sm group">
+                <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                  <span>Meal Substitutions</span>
+                  <AiActionButton
+                    participantId={participant.id}
+                    endpoint="/api/ai/meal-substitution"
+                    label="Quick Swap"
+                    regenerateLabel="New Swap"
+                    hasContent={!!participant.ai_meal_substitution}
+                  />
+                </summary>
+                {participant.ai_meal_substitution ? (
+                  <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="mb-3">
+                      <SendPlanEmail participantEmail={participant.email} participantName={participant.name} planTitle="Meal Swap Options" planContent={participant.ai_meal_substitution} />
+                    </div>
+                    <div className="whitespace-pre-wrap">{participant.ai_meal_substitution}</div>
+                  </div>
+                ) : (
+                  <div className="px-6 pb-6 text-sm text-gray-400 border-t border-gray-100 pt-4">
+                    No meal substitutions generated yet.
+                  </div>
+                )}
+              </details>
+            )}
+
+            {/* Motivation & Accountability - Accelerator + Elite */}
+            {isAccelOrElite && (
+              <details className="bg-white rounded-xl border border-gray-200 shadow-sm group">
+                <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                  <span>Motivation & Accountability</span>
+                  <AiActionButton
+                    participantId={participant.id}
+                    endpoint="/api/ai/motivation"
+                    label="Generate Message"
+                    regenerateLabel="New Message"
+                    hasContent={!!participant.ai_motivation}
+                  />
+                </summary>
+                {participant.ai_motivation ? (
+                  <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="mb-3">
+                      <SendPlanEmail participantEmail={participant.email} participantName={participant.name} planTitle="Coaching Message" planContent={participant.ai_motivation} />
+                    </div>
+                    <div className="whitespace-pre-wrap">{participant.ai_motivation}</div>
+                  </div>
+                ) : (
+                  <div className="px-6 pb-6 text-sm text-gray-400 border-t border-gray-100 pt-4">
+                    No motivation messages generated yet. Great for re-engaging quiet participants.
+                  </div>
+                )}
+              </details>
+            )}
+
+            {/* Supplement Recommendation - Accelerator + Elite */}
+            {isAccelOrElite && (
+              <details className="bg-white rounded-xl border border-gray-200 shadow-sm group">
+                <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                  <span>Supplement Recommendations</span>
+                  <AiActionButton
+                    participantId={participant.id}
+                    endpoint="/api/ai/supplements"
+                    label="Generate Recommendations"
+                    regenerateLabel="Regenerate"
+                    hasContent={!!participant.ai_supplements}
+                  />
+                </summary>
+                {participant.ai_supplements ? (
+                  <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="mb-3">
+                      <SendPlanEmail participantEmail={participant.email} participantName={participant.name} planTitle="Supplement Recommendations" planContent={participant.ai_supplements} />
+                    </div>
+                    <div className="whitespace-pre-wrap">{participant.ai_supplements}</div>
+                  </div>
+                ) : (
+                  <div className="px-6 pb-6 text-sm text-gray-400 border-t border-gray-100 pt-4">
+                    No supplement recommendations generated yet.
+                  </div>
+                )}
+              </details>
+            )}
+
+            {/* Post-Program Transition - All tiers */}
+            <details className="bg-white rounded-xl border border-gray-200 shadow-sm group">
+              <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                <span>Post-Program Transition Plan</span>
+                <AiActionButton
+                  participantId={participant.id}
+                  endpoint="/api/ai/post-program"
+                  label="Generate Plan"
+                  regenerateLabel="Regenerate"
+                  hasContent={!!participant.ai_post_program}
+                />
+              </summary>
+              {participant.ai_post_program ? (
+                <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                  <div className="mb-3">
+                    <SendPlanEmail participantEmail={participant.email} participantName={participant.name} planTitle="Post-Program Transition Plan" planContent={participant.ai_post_program} />
+                  </div>
+                  <div className="whitespace-pre-wrap">{participant.ai_post_program}</div>
+                </div>
+              ) : (
+                <div className="px-6 pb-6 text-sm text-gray-400 border-t border-gray-100 pt-4">
+                  No post-program plan generated yet. Best generated in Week 8.
+                </div>
+              )}
+            </details>
           </div>
         );
       })()}
