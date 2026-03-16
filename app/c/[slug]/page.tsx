@@ -289,6 +289,15 @@ export default function PublicSignup() {
             <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-xl p-4 mt-4 text-sm text-yellow-200/80">
               <strong className="text-yellow-200">Payment:</strong> You&apos;ll be invoiced through your Wodify account. No payment needed at signup.
             </div>
+            <div className="bg-gray-800 rounded-xl p-5 mt-4 text-left">
+              <h3 className="font-semibold mb-3 text-sm">Next Steps</h3>
+              <ol className="space-y-2 text-sm text-gray-400">
+                <li className="flex gap-2"><span className="text-red-400 font-bold">1.</span> Complete your intake form on the dashboard</li>
+                <li className="flex gap-2"><span className="text-red-400 font-bold">2.</span> Log your starting weight before {challenge.start_date}</li>
+                <li className="flex gap-2"><span className="text-red-400 font-bold">3.</span> Check in daily once the challenge starts</li>
+                <li className="flex gap-2"><span className="text-red-400 font-bold">4.</span> Check the leaderboard to see how you stack up</li>
+              </ol>
+            </div>
             {magicLink && <a href={magicLink} className="inline-block mt-6 px-8 py-3 bg-red-600 rounded-lg font-medium hover:bg-red-700 transition-colors">Go to My Dashboard</a>}
           </div>
         )}

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import ParticipantTable from "./ParticipantTable";
+import ParticipantSearch from "./ParticipantSearch";
 import ExportButton from "./ExportButton";
 import BulkActions from "./BulkActions";
 
@@ -29,7 +29,7 @@ export default async function Participants() {
   // Get the first challenge for this gym
   const { data: challenge } = await supabase
     .from("challenges")
-    .select("id, start_date")
+    .select("id")
     .eq("gym_id", gym.id)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -55,7 +55,6 @@ export default async function Participants() {
   }
 
   const challengeId = challenge.id;
-  const challengeStart = new Date(challenge.start_date);
 
   // Fetch all participants with track/tier joins
   const { data: participants } = await supabase
@@ -86,14 +85,6 @@ export default async function Participants() {
   const allCheckins = checkins ?? [];
 
   // Compute enriched data
-  const now = new Date();
-  const daysSinceStart = Math.max(
-    1,
-    Math.ceil(
-      (now.getTime() - challengeStart.getTime()) / (1000 * 60 * 60 * 24)
-    )
-  );
-
   const enriched = participants.map((p) => {
     const pCheckins = allCheckins
       .filter((c) => c.participant_id === p.id)
@@ -121,25 +112,19 @@ export default async function Participants() {
         ? Math.round((latestWeight - firstWeight) * 10) / 10
         : null;
 
-    const consistencyPct =
-      pCheckins.length > 0
-        ? Math.round((pCheckins.length / daysSinceStart) * 100)
-        : 0;
-
     return {
       id: p.id,
       name: p.name,
       email: p.email,
+      phone: (p.phone as string) ?? null,
       status: p.status,
       track_name: p.tracks?.name ?? null,
       track_icon: p.tracks?.icon ?? null,
       track_color: p.tracks?.color ?? null,
       tier_name: p.tiers?.name ?? null,
       last_checkin_date: lastCheckinDate,
-      latest_weight: latestWeight,
-      first_weight: firstWeight,
       weight_change: weightChange,
-      consistency_pct: Math.min(consistencyPct, 100),
+      total_checkins: pCheckins.length,
       payment_status: (p.payment_status as string) ?? "unpaid",
     };
   });
@@ -151,7 +136,7 @@ export default async function Participants() {
         <ExportButton />
       </div>
       <BulkActions participants={enriched.map((p) => ({ id: p.id, name: p.name }))} />
-      <ParticipantTable participants={enriched} />
+      <ParticipantSearch participants={enriched} />
     </div>
   );
 }
