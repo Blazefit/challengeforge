@@ -7,6 +7,7 @@ import PlanTabs from "./PlanTabs";
 import AiFeedback from "./AiFeedback";
 import InstallPrompt from "./InstallPrompt";
 import Milestones from "./Milestones";
+import ChallengeBanner from "./ChallengeBanner";
 
 export default async function ParticipantDashboard({
   params,
@@ -103,6 +104,15 @@ export default async function ParticipantDashboard({
           <p className="text-gray-500 text-xs mt-1">Week {weekNum}, Day {dayNum}</p>
         </div>
       </div>
+
+      <ChallengeBanner
+        challengeName={challenge?.name ?? "Challenge"}
+        startDate={challenge?.start_date ?? ""}
+        endDate={challenge?.end_date ?? ""}
+        trackName={track?.name ?? ""}
+        trackIcon={track?.icon ?? ""}
+        trackColor={track?.color ?? ""}
+      />
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
         {/* Intake CTA (show if no intake data) */}

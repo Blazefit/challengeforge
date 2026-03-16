@@ -4,6 +4,7 @@ import Link from "next/link";
 import ParticipantSearch from "./ParticipantSearch";
 import ExportButton from "./ExportButton";
 import BulkActions from "./BulkActions";
+import ContactList from "./ContactList";
 
 export default async function Participants() {
   const supabase = await createClient();
@@ -136,6 +137,19 @@ export default async function Participants() {
         <ExportButton />
       </div>
       <BulkActions participants={enriched.map((p) => ({ id: p.id, name: p.name }))} />
+      <ContactList
+        participants={enriched.map((p) => ({
+          id: p.id,
+          name: p.name,
+          email: p.email,
+          phone: p.phone,
+          track_name: p.track_name,
+          track_color: p.track_color,
+          status: p.status,
+          payment_status: p.payment_status,
+          last_checkin_date: p.last_checkin_date,
+        }))}
+      />
       <ParticipantSearch participants={enriched} />
     </div>
   );
