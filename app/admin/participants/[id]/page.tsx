@@ -4,6 +4,7 @@ import Link from "next/link";
 import GeneratePlanButton from "./GeneratePlanButton";
 import PaymentActions from "./PaymentActions";
 import CoachNotes from "./CoachNotes";
+import DashboardLink from "./DashboardLink";
 
 export default async function ParticipantDetail({
   params,
@@ -149,6 +150,14 @@ export default async function ParticipantDetail({
                 <dt className="text-gray-500">Phone</dt>
                 <dd className="text-gray-900 font-medium">
                   {participant.phone}
+                </dd>
+              </div>
+            )}
+            {participant.magic_link_token && (
+              <div>
+                <dt className="text-gray-500">Dashboard Link</dt>
+                <dd>
+                  <DashboardLink token={participant.magic_link_token} />
                 </dd>
               </div>
             )}

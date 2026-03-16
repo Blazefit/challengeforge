@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import GenerateCoachingButton from "./GenerateCoachingButton";
 
 export default async function CoachCheckins() {
   const supabase = await createClient();
@@ -73,6 +74,9 @@ export default async function CoachCheckins() {
     .eq("date", today);
 
   const todayCheckins = checkins ?? [];
+  const checkinIdsWithoutFeedback = todayCheckins
+    .filter((c) => !c.ai_feedback)
+    .map((c) => c.id);
 
   // Compute missing participants
   const checkedInIds = new Set(todayCheckins.map((c) => c.participant_id));
@@ -109,10 +113,11 @@ export default async function CoachCheckins() {
 
       {/* Today's Check-ins */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-8">
-        <div className="px-6 py-4 border-b border-gray-100">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="font-semibold text-gray-800">
             Today&apos;s Check-ins
           </h2>
+          <GenerateCoachingButton checkinIds={checkinIdsWithoutFeedback} />
         </div>
 
         {todayCheckins.length === 0 ? (
@@ -178,7 +183,7 @@ export default async function CoachCheckins() {
                           : "--"}
                       </td>
                       <td className="px-6 py-3">
-                        <RecoveryBadge value={c.recovery} />
+                        <RecoveryBadge value={c.recovery_score} />
                       </td>
                       <td className="px-6 py-3 text-gray-500 max-w-[200px] truncate">
                         {c.notes || "--"}
@@ -262,7 +267,7 @@ function TrainedBadge({ value }: { value: string | null }) {
   if (!value) return <span className="text-gray-400">--</span>;
   const config: Record<string, { label: string; className: string }> = {
     yes: { label: "Yes", className: "bg-green-100 text-green-700" },
-    rest: { label: "Rest Day", className: "bg-yellow-100 text-yellow-700" },
+    rest_day: { label: "Rest Day", className: "bg-yellow-100 text-yellow-700" },
     no: { label: "No", className: "bg-red-100 text-red-700" },
   };
   const c = config[value] ?? { label: value, className: "bg-gray-100 text-gray-600" };

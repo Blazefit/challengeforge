@@ -4,6 +4,7 @@ import { computeLeaderboard, getStreak } from "@/lib/scoring";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import PlanTabs from "./PlanTabs";
+import AiFeedback from "./AiFeedback";
 
 export default async function ParticipantDashboard({
   params,
@@ -138,6 +139,96 @@ export default async function ParticipantDashboard({
           </Link>
         </div>
 
+        {/* Goal Progress */}
+        {startingWeight && intake?.goal_weight && (
+          (() => {
+            const goalWeight = intake.goal_weight!;
+            const gainIsGood = track?.scoring_direction === "gain";
+            const displayCurrent = currentWeight || startingWeight;
+            const totalDistance = Math.abs(goalWeight - startingWeight);
+            const traveled = gainIsGood
+              ? displayCurrent - startingWeight
+              : startingWeight - displayCurrent;
+            const progressPct = totalDistance > 0
+              ? Math.max(0, Math.min(100, Math.round((traveled / totalDistance) * 100)))
+              : 0;
+            const remaining = gainIsGood
+              ? Math.max(0, goalWeight - displayCurrent)
+              : Math.max(0, displayCurrent - goalWeight);
+            const reachedGoal = remaining === 0;
+            const barColor = reachedGoal
+              ? "bg-green-500"
+              : gainIsGood
+                ? "bg-blue-500"
+                : "bg-orange-500";
+            const accentColor = reachedGoal
+              ? "text-green-400"
+              : gainIsGood
+                ? "text-blue-400"
+                : "text-orange-400";
+
+            return (
+              <div className="bg-gray-900 rounded-xl p-5">
+                <h2 className="font-bold mb-3 flex items-center gap-2">
+                  <span>&#127919;</span> Goal Progress
+                </h2>
+
+                {/* Weight labels */}
+                <div className="flex justify-between text-xs text-gray-400 mb-1">
+                  <span>{startingWeight} lbs</span>
+                  <span className="font-semibold text-white">{displayCurrent} lbs</span>
+                  <span>{goalWeight} lbs</span>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full bg-gray-800 rounded-full h-4 overflow-hidden">
+                  <div
+                    className={`${barColor} h-4 rounded-full transition-all duration-500`}
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+
+                {/* Labels under bar */}
+                <div className="flex justify-between text-[10px] text-gray-600 mt-1">
+                  <span>Start</span>
+                  <span>Goal</span>
+                </div>
+
+                {/* Stats row */}
+                <div className="flex justify-between mt-4">
+                  <div className="text-center">
+                    <p className={`text-xl font-bold ${accentColor}`}>{progressPct}%</p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Complete</p>
+                  </div>
+                  <div className="text-center">
+                    <p className={`text-xl font-bold ${accentColor}`}>{remaining.toFixed(1)}</p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Lbs to go</p>
+                  </div>
+                  <div className="text-center">
+                    <p className={`text-xl font-bold ${accentColor}`}>
+                      {gainIsGood ? "+" : "-"}{Math.abs(goalWeight - startingWeight)} lbs
+                    </p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Total Goal</p>
+                  </div>
+                </div>
+
+                {/* Motivational message */}
+                <p className="text-center text-xs text-gray-500 mt-3">
+                  {reachedGoal
+                    ? "You made it! Goal reached!"
+                    : progressPct >= 75
+                      ? "Almost there -- keep pushing!"
+                      : progressPct >= 50
+                        ? "Over halfway! Stay locked in."
+                        : progressPct >= 25
+                          ? "Great momentum -- keep going!"
+                          : "Every day gets you closer. Stay consistent!"}
+                </p>
+              </div>
+            );
+          })()
+        )}
+
         {/* Invoice / Payment Status */}
         {participant.invoice_amount_cents != null && (
           <div
@@ -204,23 +295,26 @@ export default async function ParticipantDashboard({
             <p className="text-gray-500 text-sm">No check-ins yet. Start today!</p>
           ) : (
             <div className="space-y-2">
-              {checkins.slice(0, 5).map((c: { date: string; weight: number | null; protein_hit: string | null; trained: string | null; recovery_score: number | null }) => (
-                <div key={c.date} className="flex items-center justify-between text-sm border-b border-gray-800 pb-2">
-                  <span className="text-gray-400">{c.date}</span>
-                  <div className="flex gap-3 text-xs">
-                    {c.weight && <span>{c.weight} lbs</span>}
-                    {c.protein_hit && (
-                      <span className={c.protein_hit === "yes" ? "text-green-400" : c.protein_hit === "close" ? "text-yellow-400" : "text-red-400"}>
-                        P: {c.protein_hit}
-                      </span>
-                    )}
-                    {c.trained && (
-                      <span className={c.trained === "yes" ? "text-green-400" : c.trained === "rest_day" ? "text-yellow-400" : "text-red-400"}>
-                        T: {c.trained}
-                      </span>
-                    )}
-                    {c.recovery_score && <span className="text-gray-400">R: {c.recovery_score}</span>}
+              {checkins.slice(0, 5).map((c: { date: string; weight: number | null; protein_hit: string | null; trained: string | null; recovery_score: number | null; ai_feedback: string | null }) => (
+                <div key={c.date}>
+                  <div className="flex items-center justify-between text-sm border-b border-gray-800 pb-2">
+                    <span className="text-gray-400">{c.date}</span>
+                    <div className="flex gap-3 text-xs">
+                      {c.weight && <span>{c.weight} lbs</span>}
+                      {c.protein_hit && (
+                        <span className={c.protein_hit === "yes" ? "text-green-400" : c.protein_hit === "close" ? "text-yellow-400" : "text-red-400"}>
+                          P: {c.protein_hit}
+                        </span>
+                      )}
+                      {c.trained && (
+                        <span className={c.trained === "yes" ? "text-green-400" : c.trained === "rest_day" ? "text-yellow-400" : "text-red-400"}>
+                          T: {c.trained}
+                        </span>
+                      )}
+                      {c.recovery_score && <span className="text-gray-400">R: {c.recovery_score}</span>}
+                    </div>
                   </div>
+                  {c.ai_feedback && <AiFeedback feedback={c.ai_feedback} />}
                 </div>
               ))}
             </div>
