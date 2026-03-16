@@ -16,6 +16,51 @@ export default async function AdminDashboard() {
     .select("id, name, slug, status, start_date, end_date")
     .order("created_at", { ascending: false });
 
+  // Get today's stats for the active challenge
+  const activeChallenge = challenges?.find((c) => c.status === "active") ?? challenges?.[0];
+  let todayStats = { enrolled: 0, checkedIn: 0, unpaid: 0, withoutPlans: 0 };
+
+  if (activeChallenge) {
+    const { data: participants } = await supabase
+      .from("participants")
+      .select("id, status, payment_status, ai_nutrition_plan")
+      .eq("challenge_id", activeChallenge.id);
+
+    const active = (participants ?? []).filter((p) => p.status === "active");
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
+    const { data: todayCheckins } = await supabase
+      .from("checkins")
+      .select("participant_id")
+      .eq("date", today)
+      .in("participant_id", active.map((p) => p.id));
+
+    const checkedInIds = new Set((todayCheckins ?? []).map((c) => c.participant_id));
+
+    todayStats = {
+      enrolled: active.length,
+      checkedIn: checkedInIds.size,
+      unpaid: active.filter((p) => p.payment_status !== "paid").length,
+      withoutPlans: active.filter((p) => !p.ai_nutrition_plan).length,
+    };
+  }
+
+  // Days until challenge starts or ends
+  let countdownLabel = "";
+  let countdownDays = 0;
+  if (activeChallenge) {
+    const now = new Date();
+    const start = new Date(activeChallenge.start_date + "T00:00:00");
+    const end = new Date(activeChallenge.end_date + "T00:00:00");
+    if (now < start) {
+      countdownDays = Math.ceil((start.getTime() - now.getTime()) / 86400000);
+      countdownLabel = "until kickoff";
+    } else if (now <= end) {
+      countdownDays = Math.ceil((end.getTime() - now.getTime()) / 86400000);
+      countdownLabel = "remaining";
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -44,6 +89,74 @@ export default async function AdminDashboard() {
             className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors"
           >
             Complete Onboarding
+          </Link>
+        </div>
+      )}
+
+      {/* Today's Stats */}
+      {activeChallenge && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p className="text-sm text-gray-500 mb-1">Checked In Today</p>
+            <p className="text-3xl font-bold text-gray-900">
+              {todayStats.checkedIn}
+              <span className="text-lg font-normal text-gray-400">/{todayStats.enrolled}</span>
+            </p>
+            <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full ${todayStats.enrolled > 0 && todayStats.checkedIn === todayStats.enrolled ? "bg-green-500" : "bg-red-500"}`}
+                style={{ width: `${todayStats.enrolled > 0 ? (todayStats.checkedIn / todayStats.enrolled) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p className="text-sm text-gray-500 mb-1">Total Enrolled</p>
+            <p className="text-3xl font-bold text-gray-900">{todayStats.enrolled}</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p className="text-sm text-gray-500 mb-1">Unpaid</p>
+            <p className={`text-3xl font-bold ${todayStats.unpaid > 0 ? "text-yellow-600" : "text-green-600"}`}>
+              {todayStats.unpaid}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            {countdownLabel ? (
+              <>
+                <p className="text-sm text-gray-500 mb-1">
+                  {countdownDays === 0 ? "Today!" : `Days ${countdownLabel}`}
+                </p>
+                <p className="text-3xl font-bold text-red-600">{countdownDays}</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-500 mb-1">Without Plans</p>
+                <p className={`text-3xl font-bold ${todayStats.withoutPlans > 0 ? "text-orange-600" : "text-green-600"}`}>
+                  {todayStats.withoutPlans}
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Quick Actions */}
+      {activeChallenge && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <Link href="/admin/checkins" className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:bg-gray-50 transition-colors text-center">
+            <p className="text-2xl mb-1">&#128203;</p>
+            <p className="text-sm font-medium text-gray-900">Check-Ins</p>
+          </Link>
+          <Link href="/admin/participants" className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:bg-gray-50 transition-colors text-center">
+            <p className="text-2xl mb-1">&#128101;</p>
+            <p className="text-sm font-medium text-gray-900">Participants</p>
+          </Link>
+          <Link href="/admin/leaderboard" className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:bg-gray-50 transition-colors text-center">
+            <p className="text-2xl mb-1">&#127942;</p>
+            <p className="text-sm font-medium text-gray-900">Leaderboard</p>
+          </Link>
+          <Link href="/admin/communications" className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:bg-gray-50 transition-colors text-center">
+            <p className="text-2xl mb-1">&#128172;</p>
+            <p className="text-sm font-medium text-gray-900">Comms</p>
           </Link>
         </div>
       )}
