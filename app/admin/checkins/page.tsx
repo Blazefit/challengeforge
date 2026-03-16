@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import GenerateCoachingButton from "./GenerateCoachingButton";
 import DateNav from "./DateNav";
+import QuickCheckin from "./QuickCheckin";
 
 export default async function CoachCheckins({
   searchParams,
@@ -116,6 +117,9 @@ export default async function CoachCheckins({
           <p className="text-3xl font-bold text-gray-900">{totalActive}</p>
         </div>
       </div>
+
+      {/* Quick Check-in */}
+      <QuickCheckin participants={missingParticipants.map(p => ({ id: p.id, name: p.name }))} />
 
       {/* Today's Check-ins */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-8">

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import PlanTabs from "./PlanTabs";
 import AiFeedback from "./AiFeedback";
+import InstallPrompt from "./InstallPrompt";
 
 export default async function ParticipantDashboard({
   params,
@@ -339,6 +340,7 @@ export default async function ParticipantDashboard({
           <Link href={`/dashboard/${token}/checkin`} className="flex-1 text-center py-3 bg-gray-800 rounded-xl text-sm text-gray-300 hover:bg-gray-700">Check In</Link>
         </div>
       </div>
+      <InstallPrompt />
     </div>
   );
 }

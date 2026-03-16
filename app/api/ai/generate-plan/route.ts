@@ -6,11 +6,17 @@ interface IntakeData {
   goal_weight?: number;
   age?: number;
   sex?: string;
+  gender?: string;
   height?: string;
   body_fat_percent?: number | null;
+  body_fat_pct?: number | null;
   activity_level?: string;
   training_days_per_week?: number;
+  training_experience?: string;
   dietary_restrictions?: string;
+  current_diet?: string;
+  supplements?: string;
+  meals_per_day?: number;
   cooking_skill?: string;
   meal_prep_available?: boolean;
   foods_they_love?: string;
@@ -18,6 +24,11 @@ interface IntakeData {
   fitness_level?: string;
   is_member?: string;
   goals?: string;
+  primary_goal?: string;
+  motivation?: string;
+  injuries?: string;
+  sleep_hours?: number;
+  stress_level?: number;
 }
 
 function buildPrompt(
@@ -29,15 +40,25 @@ function buildPrompt(
   const weight = intake.weight ?? "unknown";
   const goalWeight = intake.goal_weight ?? "unknown";
   const age = intake.age ?? "unknown";
-  const sex = intake.sex ?? "unknown";
+  const sex = intake.sex ?? intake.gender ?? "unknown";
   const height = intake.height ?? "unknown";
-  const bodyFat = intake.body_fat_percent != null ? `${intake.body_fat_percent}%` : "not provided";
+  const bodyFat = (intake.body_fat_percent ?? intake.body_fat_pct) != null
+    ? `${intake.body_fat_percent ?? intake.body_fat_pct}%`
+    : "not provided";
   const activityLevel = intake.activity_level ?? "unknown";
   const trainingDays = intake.training_days_per_week ?? "unknown";
+  const trainingExperience = intake.training_experience ?? "unknown";
   const dietaryRestrictions = intake.dietary_restrictions || "none";
-  const fitnessLevel = intake.fitness_level ?? "unknown";
+  const currentDiet = intake.current_diet ?? "unknown";
+  const supplements = intake.supplements ?? "none";
+  const mealsPerDay = intake.meals_per_day ?? "unknown";
+  const fitnessLevel = intake.fitness_level ?? intake.training_experience ?? "unknown";
   const isMember = intake.is_member ?? "unknown";
-  const goals = intake.goals ?? "general fitness improvement";
+  const goals = intake.primary_goal ?? intake.goals ?? "general fitness improvement";
+  const motivation = intake.motivation ?? "";
+  const injuries = intake.injuries ?? "none";
+  const sleepHours = intake.sleep_hours ?? "unknown";
+  const stressLevel = intake.stress_level ?? "unknown";
 
   const isElite = tierName.toLowerCase() === "the elite";
 
@@ -149,11 +170,18 @@ Participant Details:
 - Goal Weight: ${goalWeight} lbs
 - Body Fat: ${bodyFat}
 - Fitness Level: ${fitnessLevel}
+- Training Experience: ${trainingExperience}
 - Activity Level: ${activityLevel}
 - Training Days Per Week: ${trainingDays}
 - CrossFit Blaze Member: ${isMember}
+- Current Diet Style: ${currentDiet}
+- Meals Per Day: ${mealsPerDay}
 - Dietary Restrictions: ${dietaryRestrictions}
-- Personal Goals: ${goals}
+- Current Supplements: ${supplements}
+- Injuries/Limitations: ${injuries}
+- Average Sleep: ${sleepHours} hours/night
+- Stress Level: ${stressLevel}/10
+- Personal Goals: ${goals}${motivation ? `\n- What Motivates Them: ${motivation}` : ""}
 ${foodPrefsBlock}
 
 ${trackGuidelines}
