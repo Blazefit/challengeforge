@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import BulkGeneratePlans from "./BulkGeneratePlans";
 
 export default async function ChallengePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -140,6 +141,15 @@ export default async function ChallengePage({ params }: { params: Promise<{ id: 
           </div>
         </div>
       </div>
+
+      {/* Bulk AI Plan Generation */}
+      <BulkGeneratePlans
+        participants={(participants ?? []).map((p) => ({
+          id: p.id,
+          name: p.name,
+          has_plan: !!p.ai_nutrition_plan,
+        }))}
+      />
 
       {/* Enrollment Matrix */}
       {tracks.length > 0 && tiers.length > 0 && (

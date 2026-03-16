@@ -119,8 +119,8 @@ export function computeLeaderboard(
 export function getStreak(checkinDates: string[]): number {
   if (checkinDates.length === 0) return 0;
   const sorted = [...new Set(checkinDates)].sort().reverse();
-  const today = new Date().toISOString().split("T")[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const yesterday = new Date(Date.now() - 86400000).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
   if (sorted[0] !== today && sorted[0] !== yesterday) return 0;
 

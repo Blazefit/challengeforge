@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import ParticipantTable from "./ParticipantTable";
+import ExportButton from "./ExportButton";
 
 export default async function Participants() {
   const supabase = await createClient();
@@ -144,7 +145,10 @@ export default async function Participants() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-gray-900">Participants</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Participants</h1>
+        <ExportButton />
+      </div>
       <ParticipantTable participants={enriched} />
     </div>
   );

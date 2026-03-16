@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import GeneratePlanButton from "./GeneratePlanButton";
 import PaymentActions from "./PaymentActions";
+import CoachNotes from "./CoachNotes";
 
 export default async function ParticipantDetail({
   params,
@@ -124,6 +125,12 @@ export default async function ParticipantDetail({
         />
       </div>
 
+      {/* Coach Notes */}
+      <CoachNotes
+        participantId={participant.id}
+        initialNotes={participant.coach_notes ?? ""}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Contact Info */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
@@ -201,40 +208,134 @@ export default async function ParticipantDetail({
       {intake && (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
           <h2 className="font-semibold text-gray-800 mb-4">Intake Data</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            {intake.weight != null && (
-              <div>
-                <p className="text-gray-500">Weight</p>
-                <p className="text-gray-900 font-medium">
-                  {String(intake.weight)} lbs
-                </p>
+
+          {/* Body Stats */}
+          {(intake.weight != null || intake.goal_weight != null || intake.age != null || intake.sex != null || intake.height != null || intake.body_fat_percent != null) && (
+            <div className="mb-5">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Body Stats</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                {intake.weight != null && (
+                  <div>
+                    <p className="text-gray-500">Weight</p>
+                    <p className="text-gray-900 font-medium">{String(intake.weight)} lbs</p>
+                  </div>
+                )}
+                {intake.goal_weight != null && (
+                  <div>
+                    <p className="text-gray-500">Goal Weight</p>
+                    <p className="text-gray-900 font-medium">{String(intake.goal_weight)} lbs</p>
+                  </div>
+                )}
+                {intake.age != null && (
+                  <div>
+                    <p className="text-gray-500">Age</p>
+                    <p className="text-gray-900 font-medium">{String(intake.age)}</p>
+                  </div>
+                )}
+                {intake.sex != null && (
+                  <div>
+                    <p className="text-gray-500">Sex</p>
+                    <p className="text-gray-900 font-medium capitalize">{String(intake.sex)}</p>
+                  </div>
+                )}
+                {intake.height != null && (
+                  <div>
+                    <p className="text-gray-500">Height</p>
+                    <p className="text-gray-900 font-medium">{String(intake.height)}</p>
+                  </div>
+                )}
+                {intake.body_fat_percent != null && (
+                  <div>
+                    <p className="text-gray-500">Body Fat %</p>
+                    <p className="text-gray-900 font-medium">{String(intake.body_fat_percent)}%</p>
+                  </div>
+                )}
               </div>
-            )}
-            {intake.goal_weight != null && (
-              <div>
-                <p className="text-gray-500">Goal Weight</p>
-                <p className="text-gray-900 font-medium">
-                  {String(intake.goal_weight)} lbs
-                </p>
+            </div>
+          )}
+
+          {/* Training */}
+          {(intake.fitness_level != null || intake.activity_level != null || intake.training_days_per_week != null || intake.is_member != null) && (
+            <div className="mb-5">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Training</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                {intake.fitness_level != null && (
+                  <div>
+                    <p className="text-gray-500">Fitness Level</p>
+                    <p className="text-gray-900 font-medium capitalize">{String(intake.fitness_level)}</p>
+                  </div>
+                )}
+                {intake.activity_level != null && (
+                  <div>
+                    <p className="text-gray-500">Activity Level</p>
+                    <p className="text-gray-900 font-medium capitalize">{String(intake.activity_level)}</p>
+                  </div>
+                )}
+                {intake.training_days_per_week != null && (
+                  <div>
+                    <p className="text-gray-500">Training Days/Week</p>
+                    <p className="text-gray-900 font-medium">{String(intake.training_days_per_week)}</p>
+                  </div>
+                )}
+                {intake.is_member != null && (
+                  <div>
+                    <p className="text-gray-500">Gym Member</p>
+                    <p className="text-gray-900 font-medium capitalize">{String(intake.is_member)}</p>
+                  </div>
+                )}
               </div>
-            )}
-            {intake.fitness_level != null && (
-              <div>
-                <p className="text-gray-500">Fitness Level</p>
-                <p className="text-gray-900 font-medium capitalize">
-                  {String(intake.fitness_level)}
-                </p>
+            </div>
+          )}
+
+          {/* Nutrition */}
+          {(intake.dietary_restrictions != null || intake.cooking_skill != null || intake.meal_prep_available != null || intake.foods_they_love != null || intake.foods_they_hate != null) && (
+            <div className="mb-5">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Nutrition</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                {intake.dietary_restrictions != null && (
+                  <div className="col-span-2">
+                    <p className="text-gray-500">Dietary Restrictions</p>
+                    <p className="text-gray-900 font-medium">{String(intake.dietary_restrictions)}</p>
+                  </div>
+                )}
+                {intake.cooking_skill != null && (
+                  <div>
+                    <p className="text-gray-500">Cooking Skill</p>
+                    <p className="text-gray-900 font-medium capitalize">{String(intake.cooking_skill)}</p>
+                  </div>
+                )}
+                {intake.meal_prep_available != null && (
+                  <div>
+                    <p className="text-gray-500">Meal Prep Available</p>
+                    <p className="text-gray-900 font-medium">{intake.meal_prep_available === true || intake.meal_prep_available === "true" ? "Yes" : "No"}</p>
+                  </div>
+                )}
+                {intake.foods_they_love != null && (
+                  <div className="col-span-2">
+                    <p className="text-gray-500">Foods They Love</p>
+                    <p className="text-gray-900 font-medium">{String(intake.foods_they_love)}</p>
+                  </div>
+                )}
+                {intake.foods_they_hate != null && (
+                  <div className="col-span-2">
+                    <p className="text-gray-500">Foods They Hate</p>
+                    <p className="text-gray-900 font-medium">{String(intake.foods_they_hate)}</p>
+                  </div>
+                )}
               </div>
-            )}
-            {intake.goals != null && (
-              <div className="col-span-2 md:col-span-4">
+            </div>
+          )}
+
+          {/* Goals */}
+          {intake.goals != null && (
+            <div>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Goals</h3>
+              <div className="text-sm">
                 <p className="text-gray-500">Goals</p>
-                <p className="text-gray-900 font-medium">
-                  {String(intake.goals)}
-                </p>
+                <p className="text-gray-900 font-medium">{String(intake.goals)}</p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -323,19 +424,35 @@ export default async function ParticipantDetail({
                     <td className="px-6 py-3 text-gray-600">
                       {c.weight != null ? `${c.weight} lbs` : "--"}
                     </td>
-                    <td className="px-6 py-3 text-gray-600">
-                      {c.protein != null ? `${c.protein}g` : "--"}
+                    <td className="px-6 py-3">
+                      {c.protein_hit != null ? (
+                        <span
+                          className={
+                            c.protein_hit === "yes"
+                              ? "text-green-600 font-medium"
+                              : c.protein_hit === "close"
+                              ? "text-yellow-600 font-medium"
+                              : "text-red-500"
+                          }
+                        >
+                          {c.protein_hit === "yes" ? "Hit" : c.protein_hit === "close" ? "Close" : "Missed"}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">--</span>
+                      )}
                     </td>
                     <td className="px-6 py-3">
                       {c.trained != null ? (
                         <span
                           className={
-                            c.trained
+                            c.trained === "yes"
                               ? "text-green-600 font-medium"
-                              : "text-gray-400"
+                              : c.trained === "rest_day"
+                              ? "text-yellow-600 font-medium"
+                              : "text-red-500"
                           }
                         >
-                          {c.trained ? "Yes" : "No"}
+                          {c.trained === "yes" ? "Yes" : c.trained === "rest_day" ? "Rest" : "No"}
                         </span>
                       ) : (
                         <span className="text-gray-400">--</span>
@@ -345,7 +462,7 @@ export default async function ParticipantDetail({
                       {c.steps != null ? c.steps.toLocaleString() : "--"}
                     </td>
                     <td className="px-6 py-3 text-gray-600">
-                      {c.recovery != null ? `${c.recovery}/10` : "--"}
+                      {c.recovery_score != null ? `${c.recovery_score}/10` : "--"}
                     </td>
                     <td className="px-6 py-3 text-gray-600 max-w-xs truncate">
                       {c.notes ?? "--"}
