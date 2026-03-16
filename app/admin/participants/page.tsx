@@ -138,6 +138,7 @@ export default async function Participants() {
       first_weight: firstWeight,
       weight_change: weightChange,
       consistency_pct: Math.min(consistencyPct, 100),
+      payment_status: (p.payment_status as string) ?? "unpaid",
     };
   });
 

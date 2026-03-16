@@ -17,6 +17,7 @@ interface EnrichedParticipant {
   first_weight: number | null;
   weight_change: number | null;
   consistency_pct: number;
+  payment_status: string;
 }
 
 export default function ParticipantTable({
@@ -105,6 +106,7 @@ export default function ParticipantTable({
               <th className="px-6 py-3">Status</th>
               <th className="px-6 py-3">Last Check-in</th>
               <th className="px-6 py-3">Weight Change</th>
+              <th className="px-6 py-3">Payment</th>
               <th className="px-6 py-3">Consistency</th>
             </tr>
           </thead>
@@ -112,7 +114,7 @@ export default function ParticipantTable({
             {filtered.length === 0 ? (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={9}
                   className="px-6 py-12 text-center text-gray-400"
                 >
                   No participants match your filters.
@@ -191,6 +193,19 @@ export default function ParticipantTable({
                     ) : (
                       <span className="text-gray-400">--</span>
                     )}
+                  </td>
+                  <td className="px-6 py-3">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        p.payment_status === "paid"
+                          ? "bg-green-100 text-green-700"
+                          : p.payment_status === "invoiced"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {p.payment_status}
+                    </span>
                   </td>
                   <td className="px-6 py-3">
                     <div className="flex items-center gap-2">

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import GeneratePlanButton from "./GeneratePlanButton";
+import PaymentActions from "./PaymentActions";
 
 export default async function ParticipantDetail({
   params,
@@ -111,6 +112,15 @@ export default async function ParticipantDetail({
         <GeneratePlanButton
           participantId={participant.id}
           hasPlan={!!participant.ai_nutrition_plan}
+        />
+      </div>
+
+      {/* Payment / Invoice */}
+      <div className="mb-8">
+        <PaymentActions
+          participantId={participant.id}
+          paymentStatus={participant.payment_status ?? null}
+          invoiceAmountCents={participant.invoice_amount_cents ?? null}
         />
       </div>
 

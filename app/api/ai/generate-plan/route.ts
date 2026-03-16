@@ -4,7 +4,19 @@ import { createAdminClient } from "@/lib/supabase/admin";
 interface IntakeData {
   weight?: number;
   goal_weight?: number;
+  age?: number;
+  sex?: string;
+  height?: string;
+  body_fat_percent?: number | null;
+  activity_level?: string;
+  training_days_per_week?: number;
+  dietary_restrictions?: string;
+  cooking_skill?: string;
+  meal_prep_available?: boolean;
+  foods_they_love?: string;
+  foods_they_hate?: string;
   fitness_level?: string;
+  is_member?: string;
   goals?: string;
 }
 
@@ -16,75 +28,162 @@ function buildPrompt(
 ): string {
   const weight = intake.weight ?? "unknown";
   const goalWeight = intake.goal_weight ?? "unknown";
+  const age = intake.age ?? "unknown";
+  const sex = intake.sex ?? "unknown";
+  const height = intake.height ?? "unknown";
+  const bodyFat = intake.body_fat_percent != null ? `${intake.body_fat_percent}%` : "not provided";
+  const activityLevel = intake.activity_level ?? "unknown";
+  const trainingDays = intake.training_days_per_week ?? "unknown";
+  const dietaryRestrictions = intake.dietary_restrictions || "none";
   const fitnessLevel = intake.fitness_level ?? "unknown";
+  const isMember = intake.is_member ?? "unknown";
   const goals = intake.goals ?? "general fitness improvement";
+
+  const isElite = tierName.toLowerCase() === "the elite";
+
+  // Elite-only food preference details
+  let foodPrefsBlock = "";
+  if (isElite) {
+    const cookingSkill = intake.cooking_skill ?? "unknown";
+    const mealPrep = intake.meal_prep_available != null
+      ? (intake.meal_prep_available ? "Yes" : "No")
+      : "unknown";
+    const foodsLove = intake.foods_they_love || "not specified";
+    const foodsHate = intake.foods_they_hate || "not specified";
+    foodPrefsBlock = `
+Meal Planning Preferences (Elite tier — use these for the custom meal plan):
+- Cooking Skill: ${cookingSkill}
+- Meal Prep Available: ${mealPrep}
+- Foods They Love: ${foodsLove}
+- Foods They Hate: ${foodsHate}`;
+  }
 
   let trackGuidelines = "";
 
   switch (trackName.toLowerCase()) {
     case "hard gainer":
       trackGuidelines = `Track: Hard Gainer
-- Calorie surplus: +500 calories above maintenance
-- High protein: 1g per pound of bodyweight
-- High carbohydrate focus to support muscle growth
-- 3 strength training sessions per week
-- Focus on compound movements and progressive overload`;
+- Caloric surplus: +500 calories above maintenance (minimum)
+- Protein: 1g per pound of bodyweight
+- Carbs: 45-50% of total calories
+- Fat: 25-30% of total calories
+- 4-5 meals per day plus snacks
+- Focus on compound lifts and progressive overload
+- 3 strength sessions per week minimum
+- Prioritize caloric density — do not let them under-eat`;
       break;
     case "last 10":
       trackGuidelines = `Track: Last 10
-- Calorie deficit: -300 to -500 calories below maintenance
-- High protein to preserve lean mass
-- Lower carbohydrate intake
-- 5 training days per week
-- 10,000 steps daily minimum
+- Caloric deficit: 300-500 calories below maintenance
+- Protein: 1g per pound of bodyweight
+- Carbs: 25-30% of total calories
+- Fat: 25-30% of total calories
+- 3-4 meals per day, no snacking between meals
+- Carb cycling: higher carbs on training days, lower on rest days
+- 10,000 steps daily non-negotiable
+- Strategic refeeds only (once per week at maintenance if needed)
 - Mix of strength training and metabolic conditioning`;
       break;
     case "transformer":
       trackGuidelines = `Track: Transformer
 - Maintenance calories or slight deficit (-100 to -200 calories)
-- Balanced macronutrient distribution
-- 4 workouts per week
-- Focus on body recomposition (building muscle while reducing body fat)
-- Progressive strength training with conditioning work`;
+- Protein: 1g per pound of bodyweight
+- Carbs: ~40% of total calories
+- Fat: 25-30% of total calories
+- 3-4 meals per day
+- Scaled workouts appropriate to fitness level
+- Habit-building focus — consistency over intensity
+- Sustainable approach: build routines they can maintain long-term`;
       break;
     default:
       trackGuidelines = `Track: ${trackName}
 - Balanced approach to nutrition and training`;
   }
 
-  return `You are an expert fitness and nutrition coach creating a personalized plan for a challenge participant.
+  // Tier-level detail instructions
+  let tierInstructions = "";
+  switch (tierName.toLowerCase()) {
+    case "the plan":
+      tierInstructions = `Tier: The Plan (self-serve)
+- Provide clear general guidelines they can follow independently
+- Macro targets and calorie ranges (not full meal plans)
+- General meal timing recommendations
+- Training framework they can adapt on their own`;
+      break;
+    case "the accelerator":
+      tierInstructions = `Tier: The Accelerator (coaching-level detail)
+- Provide detailed, specific coaching-quality output
+- Precise calorie and macro targets for training and rest days
+- Detailed meal timing strategy
+- Specific training programming with progressions
+- Do NOT include a full 7-day meal plan — focus on macro targets and general meal timing`;
+      break;
+    case "the elite":
+      tierInstructions = `Tier: The Elite (maximum detail, full custom plan)
+- Provide maximum detail in every section
+- Precise calorie and macro targets for training and rest days
+- Full custom 7-day meal plan with specific foods, portions, and recipes
+- Incorporate their food preferences (foods they love/hate) and cooking skill level
+- Account for meal prep availability
+- Detailed training programming with week-by-week progressions
+- Leave nothing to guesswork`;
+      break;
+    default:
+      tierInstructions = `Tier: ${tierName}`;
+  }
+
+  const nutritionSectionEliteAddition = isElite
+    ? `- Full custom 7-day meal plan with specific foods, portions, and simple prep instructions
+  - Incorporate their food preferences — use foods they love, avoid foods they hate
+  - Match recipes to their cooking skill level and meal prep availability`
+    : `- Macro targets and general meal timing guidance (no full meal plan needed)`;
+
+  return `You are a CrossFit Blaze coach creating a personalized 6-week challenge plan. Your coaching voice is encouraging but direct, no-BS, and results-focused. Talk to ${name} like a coach who genuinely cares about their success but won't sugarcoat the work required.
 
 Participant Details:
 - Name: ${name}
+- Age: ${age}
+- Sex: ${sex}
+- Height: ${height}
 - Current Weight: ${weight} lbs
 - Goal Weight: ${goalWeight} lbs
+- Body Fat: ${bodyFat}
 - Fitness Level: ${fitnessLevel}
+- Activity Level: ${activityLevel}
+- Training Days Per Week: ${trainingDays}
+- CrossFit Blaze Member: ${isMember}
+- Dietary Restrictions: ${dietaryRestrictions}
 - Personal Goals: ${goals}
-- Tier: ${tierName}
+${foodPrefsBlock}
 
 ${trackGuidelines}
+
+${tierInstructions}
 
 Generate a comprehensive, personalized plan with TWO sections. Use markdown formatting.
 
 SECTION 1 - Start with exactly "## Nutrition Plan"
 Include:
-- Daily calorie target with explanation
-- Macronutrient breakdown (protein, carbs, fats in grams)
-- Meal timing recommendations
-- Sample daily meal plan with specific foods and portions
-- Hydration guidelines
-- Supplement recommendations if appropriate
+- BMR calculation using the Mifflin-St Jeor equation (show the math)
+- TDEE calculation with appropriate activity multiplier
+- Track-adjusted calorie target for BOTH training days AND rest days
+- Macronutrient breakdown in grams for training days and rest days (protein, carbs, fats)
+- Meal timing relative to training (pre-workout, post-workout, etc.)
+${nutritionSectionEliteAddition}
+- Hydration guidelines (water intake target based on bodyweight)
+- Supplement recommendations if appropriate (creatine, protein powder, etc.)
 
 SECTION 2 - Start with exactly "## Training Plan"
 Include:
-- Weekly training schedule (which days, what type of training)
-- Specific exercises with sets and reps
+- Weekly schedule (which days, what type of training — strength, conditioning, active recovery)
+- Specific exercises with sets, reps, and suggested loading
 - Warm-up and cool-down protocols
-- Progressive overload strategy
-- Recovery recommendations
+- Progressive overload strategy week by week across the 6-week challenge
+- Murph prep integration: the challenge culminates in a Murph workout on May 23rd (1 mile run, 100 pull-ups, 200 push-ups, 300 squats, 1 mile run). Build toward this progressively.
 - Modifications based on fitness level (${fitnessLevel})
+- Recovery recommendations (sleep, mobility, rest day activities)
 
-Make the plan specific to ${name}, referencing their goals and current stats. Be encouraging but realistic. Use practical, actionable advice.`;
+Make the plan specific to ${name}, referencing their goals and current stats throughout. Be encouraging but direct — this is a challenge, not a vacation. Use practical, actionable advice they can start immediately.`;
 }
 
 export async function POST(request: Request) {

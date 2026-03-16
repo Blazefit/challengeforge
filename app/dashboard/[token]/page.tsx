@@ -138,6 +138,27 @@ export default async function ParticipantDashboard({
           </Link>
         </div>
 
+        {/* Invoice / Payment Status */}
+        {participant.invoice_amount_cents != null && (
+          <div
+            className={`rounded-xl p-4 border ${
+              participant.payment_status === "paid"
+                ? "bg-green-900/20 border-green-700"
+                : "bg-yellow-900/20 border-yellow-700"
+            }`}
+          >
+            {participant.payment_status === "paid" ? (
+              <p className="text-green-400 font-medium text-sm">
+                Payment: ${(participant.invoice_amount_cents / 100).toFixed(2)} — Paid &#10003;
+              </p>
+            ) : (
+              <p className="text-yellow-400 font-medium text-sm">
+                Invoice: ${(participant.invoice_amount_cents / 100).toFixed(2)} — Payment pending. You&apos;ll be invoiced through your Wodify account.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* My Plan */}
         <div className="bg-gray-900 rounded-xl p-5">
           <h2 className="font-bold mb-3">My Plan</h2>
