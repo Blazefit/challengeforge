@@ -1,6 +1,14 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { computeLeaderboard } from "@/lib/scoring";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+
+// Auto-refresh every 60 seconds for TV display
+export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Leaderboard",
+};
 
 export default async function PublicLeaderboard({
   params,
@@ -55,15 +63,29 @@ export default async function PublicLeaderboard({
                 </div>
                 <div className="text-right">
                   <p className="text-2xl font-black">{s.score.toFixed(1)}</p>
-                  <p className="text-xs text-gray-500">{s.consistency_pct.toFixed(0)}% consistent</p>
+                  <div className="flex items-center gap-2 justify-end text-xs text-gray-500">
+                    {s.weight_change_pct !== 0 && (
+                      <span className={s.weight_change_pct > 0 ? "text-blue-400" : "text-green-400"}>
+                        {s.weight_change_pct > 0 ? "+" : ""}{s.weight_change_pct.toFixed(1)}%
+                      </span>
+                    )}
+                    <span>{s.consistency_pct.toFixed(0)}%</span>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        <p className="text-center text-gray-600 text-xs mt-8">Auto-refreshes on page load. Scoring based on weight change, consistency, and track-specific metrics.</p>
+        <p className="text-center text-gray-600 text-xs mt-8">Scoring based on weight change, consistency, and track-specific metrics.</p>
       </div>
+
+      {/* Auto-refresh for TV display mode */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `setTimeout(function(){ window.location.reload(); }, 60000);`,
+        }}
+      />
     </div>
   );
 }

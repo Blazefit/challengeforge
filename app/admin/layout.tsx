@@ -36,6 +36,7 @@ export default async function AdminLayout({
             <Link href="/admin/leaderboard" className="text-gray-700 hover:text-red-600">Leaderboard</Link>
             <Link href="/admin/checkins" className="text-gray-700 hover:text-red-600">Check-Ins</Link>
             <Link href="/admin/communications" className="text-gray-700 hover:text-red-600">Comms</Link>
+            <Link href="/admin/reports" className="text-gray-700 hover:text-red-600">Reports</Link>
             <Link href="/admin/marketing" className="text-gray-700 hover:text-red-600">Marketing</Link>
             <Link href="/admin/settings" className="text-gray-700 hover:text-red-600">Settings</Link>
             <form action={signOut}>

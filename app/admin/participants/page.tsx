@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import ParticipantTable from "./ParticipantTable";
 import ExportButton from "./ExportButton";
+import BulkActions from "./BulkActions";
 
 export default async function Participants() {
   const supabase = await createClient();
@@ -149,6 +150,7 @@ export default async function Participants() {
         <h1 className="text-2xl font-bold text-gray-900">Participants</h1>
         <ExportButton />
       </div>
+      <BulkActions participants={enriched.map((p) => ({ id: p.id, name: p.name }))} />
       <ParticipantTable participants={enriched} />
     </div>
   );
