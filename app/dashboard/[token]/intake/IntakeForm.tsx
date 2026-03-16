@@ -35,6 +35,12 @@ export default function IntakeForm({ token, participantId, existingIntake }: Int
     injuries: v("injuries"),
     sleep_hours: v("sleep_hours"),
     stress_level: v("stress_level"),
+    activity_level: v("activity_level"),
+    is_member: v("is_member"),
+    cooking_skill: v("cooking_skill"),
+    meal_prep_available: v("meal_prep_available"),
+    foods_they_love: v("foods_they_love"),
+    foods_they_hate: v("foods_they_hate"),
   });
 
   function update(field: string, value: string | number) {
@@ -205,6 +211,33 @@ export default function IntakeForm({ token, participantId, existingIntake }: Int
             </select>
           </div>
           <div>
+            <label className={labelClass}>Activity Level</label>
+            <select
+              value={form.activity_level as string}
+              onChange={(e) => update("activity_level", e.target.value)}
+              className={selectClass}
+            >
+              <option value="">Select...</option>
+              <option value="sedentary">Sedentary</option>
+              <option value="lightly_active">Lightly Active</option>
+              <option value="moderately_active">Moderately Active</option>
+              <option value="very_active">Very Active</option>
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>CrossFit Blaze Member?</label>
+            <select
+              value={form.is_member as string}
+              onChange={(e) => update("is_member", e.target.value)}
+              className={selectClass}
+            >
+              <option value="">Select...</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+              <option value="former">Former</option>
+            </select>
+          </div>
+          <div>
             <label className={labelClass}>Injuries or Limitations</label>
             <textarea
               value={form.injuries as string}
@@ -271,6 +304,51 @@ export default function IntakeForm({ token, participantId, existingIntake }: Int
               onChange={(e) => update("supplements", e.target.value)}
               placeholder="e.g. protein, creatine, multivitamin"
               className={inputClass}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Cooking Skill</label>
+            <select
+              value={form.cooking_skill as string}
+              onChange={(e) => update("cooking_skill", e.target.value)}
+              className={selectClass}
+            >
+              <option value="">Select...</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>Meal Prep Available?</label>
+            <select
+              value={form.meal_prep_available as string}
+              onChange={(e) => update("meal_prep_available", e.target.value)}
+              className={selectClass}
+            >
+              <option value="">Select...</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>Foods You Love</label>
+            <textarea
+              value={form.foods_they_love as string}
+              onChange={(e) => update("foods_they_love", e.target.value)}
+              placeholder="Foods you enjoy and want included in your plan..."
+              rows={2}
+              className={inputClass + " resize-y"}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Foods You Hate</label>
+            <textarea
+              value={form.foods_they_hate as string}
+              onChange={(e) => update("foods_they_hate", e.target.value)}
+              placeholder="Foods you dislike or never want to eat..."
+              rows={2}
+              className={inputClass + " resize-y"}
             />
           </div>
         </div>

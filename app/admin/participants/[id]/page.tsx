@@ -6,6 +6,7 @@ import PaymentActions from "./PaymentActions";
 import CoachNotes from "./CoachNotes";
 import DashboardLink from "./DashboardLink";
 import EditParticipant from "./EditParticipant";
+import AiReadiness from "./AiReadiness";
 import WelcomeEmail from "./WelcomeEmail";
 
 export default async function ParticipantDetail({
@@ -132,6 +133,12 @@ export default async function ParticipantDetail({
         tiers={tiers}
       />
 
+      {/* AI Plan Readiness */}
+      <AiReadiness
+        intake={participant.intake_pre as Record<string, unknown> | null}
+        tierName={(participant.tiers as { name: string } | null)?.name ?? null}
+      />
+
       {/* Generate Plan Button */}
       <div className="mb-8">
         <GeneratePlanButton
@@ -256,139 +263,94 @@ export default async function ParticipantDetail({
       )}
 
       {/* Intake Data */}
-      {intake && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
-          <h2 className="font-semibold text-gray-800 mb-4">Intake Data</h2>
+      {intake && (() => {
+        const fmt = (val: unknown, suffix?: string): string => {
+          if (val == null || val === "") return "";
+          if (typeof val === "boolean") return val ? "Yes" : "No";
+          if (val === "true") return "Yes";
+          if (val === "false") return "No";
+          return suffix ? `${String(val)}${suffix}` : String(val);
+        };
 
-          {/* Body Stats */}
-          {(intake.weight != null || intake.goal_weight != null || intake.age != null || intake.sex != null || intake.height != null || intake.body_fat_percent != null) && (
-            <div className="mb-5">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Body Stats</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                {intake.weight != null && (
-                  <div>
-                    <p className="text-gray-500">Weight</p>
-                    <p className="text-gray-900 font-medium">{String(intake.weight)} lbs</p>
-                  </div>
-                )}
-                {intake.goal_weight != null && (
-                  <div>
-                    <p className="text-gray-500">Goal Weight</p>
-                    <p className="text-gray-900 font-medium">{String(intake.goal_weight)} lbs</p>
-                  </div>
-                )}
-                {intake.age != null && (
-                  <div>
-                    <p className="text-gray-500">Age</p>
-                    <p className="text-gray-900 font-medium">{String(intake.age)}</p>
-                  </div>
-                )}
-                {intake.sex != null && (
-                  <div>
-                    <p className="text-gray-500">Sex</p>
-                    <p className="text-gray-900 font-medium capitalize">{String(intake.sex)}</p>
-                  </div>
-                )}
-                {intake.height != null && (
-                  <div>
-                    <p className="text-gray-500">Height</p>
-                    <p className="text-gray-900 font-medium">{String(intake.height)}</p>
-                  </div>
-                )}
-                {intake.body_fat_percent != null && (
-                  <div>
-                    <p className="text-gray-500">Body Fat %</p>
-                    <p className="text-gray-900 font-medium">{String(intake.body_fat_percent)}%</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+        const categories = [
+          {
+            title: "Body Stats",
+            fields: [
+              { label: "Weight", value: fmt(intake.weight, " lbs") },
+              { label: "Goal Weight", value: fmt(intake.goal_weight, " lbs") },
+              { label: "Age", value: fmt(intake.age) },
+              { label: "Sex", value: fmt(intake.sex ?? intake.gender) },
+              { label: "Height", value: fmt(intake.height) },
+              { label: "Body Fat %", value: fmt(intake.body_fat_pct ?? intake.body_fat_percent, "%") },
+            ],
+          },
+          {
+            title: "Training",
+            fields: [
+              { label: "Activity Level", value: fmt(intake.activity_level) },
+              { label: "Fitness Level", value: fmt(intake.fitness_level) },
+              { label: "Training Experience", value: fmt(intake.training_experience) },
+              { label: "Training Days/Week", value: fmt(intake.training_days_per_week) },
+              { label: "Gym Member", value: fmt(intake.is_member) },
+              { label: "Injuries", value: fmt(intake.injuries) },
+            ],
+          },
+          {
+            title: "Nutrition",
+            fields: [
+              { label: "Current Diet", value: fmt(intake.current_diet) },
+              { label: "Meals Per Day", value: fmt(intake.meals_per_day) },
+              { label: "Dietary Restrictions", value: fmt(intake.dietary_restrictions) },
+              { label: "Supplements", value: fmt(intake.supplements) },
+              { label: "Cooking Skill", value: fmt(intake.cooking_skill) },
+              { label: "Meal Prep Available", value: fmt(intake.meal_prep_available) },
+              { label: "Foods They Love", value: fmt(intake.foods_they_love) },
+              { label: "Foods They Hate", value: fmt(intake.foods_they_hate) },
+            ],
+          },
+          {
+            title: "Goals & Lifestyle",
+            fields: [
+              { label: "Primary Goal", value: fmt(intake.primary_goal ?? intake.goals) },
+              { label: "Motivation", value: fmt(intake.motivation) },
+              { label: "Sleep Hours", value: fmt(intake.sleep_hours) },
+              { label: "Stress Level", value: fmt(intake.stress_level) },
+            ],
+          },
+        ];
 
-          {/* Training */}
-          {(intake.fitness_level != null || intake.activity_level != null || intake.training_days_per_week != null || intake.is_member != null) && (
-            <div className="mb-5">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Training</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                {intake.fitness_level != null && (
-                  <div>
-                    <p className="text-gray-500">Fitness Level</p>
-                    <p className="text-gray-900 font-medium capitalize">{String(intake.fitness_level)}</p>
-                  </div>
-                )}
-                {intake.activity_level != null && (
-                  <div>
-                    <p className="text-gray-500">Activity Level</p>
-                    <p className="text-gray-900 font-medium capitalize">{String(intake.activity_level)}</p>
-                  </div>
-                )}
-                {intake.training_days_per_week != null && (
-                  <div>
-                    <p className="text-gray-500">Training Days/Week</p>
-                    <p className="text-gray-900 font-medium">{String(intake.training_days_per_week)}</p>
-                  </div>
-                )}
-                {intake.is_member != null && (
-                  <div>
-                    <p className="text-gray-500">Gym Member</p>
-                    <p className="text-gray-900 font-medium capitalize">{String(intake.is_member)}</p>
-                  </div>
-                )}
-              </div>
+        return (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-8 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="font-semibold text-gray-800">Intake Data</h2>
             </div>
-          )}
 
-          {/* Nutrition */}
-          {(intake.dietary_restrictions != null || intake.cooking_skill != null || intake.meal_prep_available != null || intake.foods_they_love != null || intake.foods_they_hate != null) && (
-            <div className="mb-5">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Nutrition</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                {intake.dietary_restrictions != null && (
-                  <div className="col-span-2">
-                    <p className="text-gray-500">Dietary Restrictions</p>
-                    <p className="text-gray-900 font-medium">{String(intake.dietary_restrictions)}</p>
+            <div className="divide-y divide-gray-100">
+              {categories.map((cat) => (
+                <div key={cat.title}>
+                  <div className="bg-gray-50 px-6 py-2.5 border-b border-gray-100">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      {cat.title}
+                    </h3>
                   </div>
-                )}
-                {intake.cooking_skill != null && (
-                  <div>
-                    <p className="text-gray-500">Cooking Skill</p>
-                    <p className="text-gray-900 font-medium capitalize">{String(intake.cooking_skill)}</p>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-4 px-6 py-4 text-sm">
+                    {cat.fields.map((f) => (
+                      <div key={f.label} className="flex flex-col">
+                        <dt className="text-gray-500 text-xs mb-0.5">{f.label}</dt>
+                        {f.value ? (
+                          <dd className="text-gray-900 font-medium capitalize">{f.value}</dd>
+                        ) : (
+                          <dd className="text-gray-300 font-medium">--</dd>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                )}
-                {intake.meal_prep_available != null && (
-                  <div>
-                    <p className="text-gray-500">Meal Prep Available</p>
-                    <p className="text-gray-900 font-medium">{intake.meal_prep_available === true || intake.meal_prep_available === "true" ? "Yes" : "No"}</p>
-                  </div>
-                )}
-                {intake.foods_they_love != null && (
-                  <div className="col-span-2">
-                    <p className="text-gray-500">Foods They Love</p>
-                    <p className="text-gray-900 font-medium">{String(intake.foods_they_love)}</p>
-                  </div>
-                )}
-                {intake.foods_they_hate != null && (
-                  <div className="col-span-2">
-                    <p className="text-gray-500">Foods They Hate</p>
-                    <p className="text-gray-900 font-medium">{String(intake.foods_they_hate)}</p>
-                  </div>
-                )}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
-
-          {/* Goals */}
-          {intake.goals != null && (
-            <div>
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Goals</h3>
-              <div className="text-sm">
-                <p className="text-gray-500">Goals</p>
-                <p className="text-gray-900 font-medium">{String(intake.goals)}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+          </div>
+        );
+      })()}
 
       {/* AI Plans */}
       {participant.ai_nutrition_plan || participant.ai_training_plan ? (
