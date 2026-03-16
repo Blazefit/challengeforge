@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import ActivityFeed from "./ActivityFeed";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -207,6 +208,9 @@ export default async function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* Activity Feed */}
+      <ActivityFeed initialItems={[]} />
     </div>
   );
 }

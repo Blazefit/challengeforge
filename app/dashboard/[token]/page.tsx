@@ -6,6 +6,7 @@ import Link from "next/link";
 import PlanTabs from "./PlanTabs";
 import AiFeedback from "./AiFeedback";
 import InstallPrompt from "./InstallPrompt";
+import Milestones from "./Milestones";
 
 export default async function ParticipantDashboard({
   params,
@@ -79,6 +80,14 @@ export default async function ParticipantDashboard({
     ? Math.min(100, Math.round((checkins.length / Math.max(1, Math.floor((Date.now() - new Date(challenge.start_date).getTime()) / 86400000))) * 100))
     : 0;
 
+  const proteinCheckins = checkins.filter((c: { protein_hit: string | null }) => c.protein_hit != null);
+  const proteinYes = proteinCheckins.filter((c: { protein_hit: string | null }) => c.protein_hit === "yes").length;
+  const proteinAdherence = proteinCheckins.length > 0 ? Math.round((proteinYes / proteinCheckins.length) * 100) : 0;
+
+  const weightChangePct = startingWeight && currentWeight
+    ? Math.round(((currentWeight - startingWeight) / startingWeight) * 1000) / 10
+    : null;
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Header */}
@@ -150,6 +159,15 @@ export default async function ParticipantDashboard({
             <p className="text-xs text-gray-500">Rank</p>
           </Link>
         </div>
+
+        {/* Milestones */}
+        <Milestones
+          checkinCount={checkins.length}
+          streak={streak}
+          weightChangePct={weightChangePct}
+          consistency={consistency}
+          proteinAdherence={proteinAdherence}
+        />
 
         {/* Goal Progress */}
         {startingWeight && intake?.goal_weight && (
