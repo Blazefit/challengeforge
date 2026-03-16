@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendWelcomeEmail, sendAdminSignupNotification } from "@/lib/email";
 import { NextResponse } from "next/server";
-import { sendWelcomeEmail } from "@/lib/email";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,11 +12,11 @@ export async function OPTIONS() {
   return NextResponse.json(null, { headers: corsHeaders });
 }
 
-// Tier ID → price in cents
-const TIER_PRICES: Record<string, number> = {
-  "97e3b54e-47c5-41b2-9702-355adcee94d1": 9900,   // The Plan — $99
-  "67df8de0-b7cf-4b40-a954-6a60d99b075b": 19900,  // The Accelerator — $199
-  "1f7ada0c-d6f6-4f94-b788-f7e705340240": 39900,  // The Elite — $399
+// Tier ID → price info
+const TIER_PRICES: Record<string, { cents: number; label: string }> = {
+  "97e3b54e-47c5-41b2-9702-355adcee94d1": { cents: 9900, label: "$99" },
+  "67df8de0-b7cf-4b40-a954-6a60d99b075b": { cents: 19900, label: "$199" },
+  "1f7ada0c-d6f6-4f94-b788-f7e705340240": { cents: 39900, label: "$399" },
 };
 
 export async function POST(request: Request) {
@@ -34,10 +34,11 @@ export async function POST(request: Request) {
     goal_weight: goal_weight ? Number(goal_weight) : (intake_pre?.goal_weight ?? null),
   };
 
-  const invoiceAmountCents = TIER_PRICES[tier_id] ?? null;
+  const tierInfo = TIER_PRICES[tier_id] ?? { cents: null, label: "TBD" };
 
   const supabase = createAdminClient();
 
+  // Insert participant
   const { data, error } = await supabase
     .from("participants")
     .insert({
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
       intake_pre: intakeData,
       status: "active",
       payment_status: "unpaid",
-      invoice_amount_cents: invoiceAmountCents,
+      invoice_amount_cents: tierInfo.cents,
     })
     .select("id, magic_link_token")
     .single();
@@ -62,23 +63,54 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
   }
 
-  // Send welcome email (fire-and-forget — don't block signup response)
+  // Look up track, tier, and challenge names for emails
+  const [trackResult, tierResult, challengeResult] = await Promise.all([
+    supabase.from("tracks").select("name").eq("id", track_id).single(),
+    supabase.from("tiers").select("name").eq("id", tier_id).single(),
+    supabase.from("challenges").select("name").eq("id", challenge_id).single(),
+  ]);
+
+  const trackName = trackResult.data?.name || "Challenger";
+  const tierName = tierResult.data?.name || "Participant";
+  const challengeName = challengeResult.data?.name || "Summer Slim Down 2026";
+
+  // Build URLs
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://challengeforge.vercel.app";
   const dashboardUrl = `${appUrl}/dashboard/${data.magic_link_token}`;
+  const adminUrl = `${appUrl}/admin/participants/${data.id}`;
 
-  // Look up track and tier names for the email
-  const { data: trackRow } = await supabase.from("tracks").select("name").eq("id", track_id).single();
-  const { data: tierRow } = await supabase.from("tiers").select("name").eq("id", tier_id).single();
-  const { data: challengeRow } = await supabase.from("challenges").select("name").eq("id", challenge_id).single();
+  // Send emails in parallel (fire-and-forget — don't block signup response)
+  Promise.all([
+    // 1. Participant confirmation email
+    sendWelcomeEmail({
+      to: email,
+      participantName: name,
+      trackName,
+      tierName,
+      dashboardUrl,
+      challengeName,
+    }).then(r => {
+      if (!r.success) console.error("[Signup] Failed to send welcome email to", email, r.error);
+      else console.log("[Signup] Welcome email sent to", email, "id:", r.id);
+    }),
 
-  sendWelcomeEmail({
-    to: email,
-    participantName: name,
-    trackName: trackRow?.name ?? "Challenger",
-    tierName: tierRow?.name ?? "Participant",
-    dashboardUrl,
-    challengeName: challengeRow?.name ?? "Summer Slim Down 2026",
-  }).catch((err) => console.error("Welcome email failed:", err));
+    // 2. Admin notification email
+    sendAdminSignupNotification({
+      participantName: name,
+      email,
+      phone: phone || undefined,
+      trackName,
+      tierName,
+      tierPrice: tierInfo.label,
+      weight: weight ? Number(weight) : undefined,
+      goalWeight: goal_weight ? Number(goal_weight) : undefined,
+      adminUrl,
+      paymentStatus: "unpaid",
+    }).then(r => {
+      if (!r.success) console.error("[Signup] Failed to send admin notification", r.error);
+      else console.log("[Signup] Admin notification sent, id:", r.id);
+    }),
+  ]).catch(err => console.error("[Signup] Email error:", err));
 
   return NextResponse.json({ id: data.id, magic_link_token: data.magic_link_token }, { headers: corsHeaders });
 }
