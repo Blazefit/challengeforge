@@ -11,8 +11,8 @@ function getResend(): Resend {
   return _resend;
 }
 
-// Once crossfitblaze.com DNS records are verified in Resend, update this:
-const FROM_EMAIL = process.env.FROM_EMAIL || "ChallengeForge <onboarding@resend.dev>";
+// crossfitblaze.com domain verified in Resend — DNS records added 2026-03-16
+const FROM_EMAIL = process.env.FROM_EMAIL || "CrossFit Blaze <noreply@crossfitblaze.com>";
 const ADMIN_EMAIL = "jason@crossfitblaze.com";
 
 // ── Generic send helper ─────────────────────────────────────────────────────
