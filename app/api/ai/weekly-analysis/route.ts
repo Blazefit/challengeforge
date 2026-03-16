@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getJoinedName } from "@/lib/ai-utils";
 
 interface CheckinRecord {
   date: string;
@@ -131,7 +132,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Participant not found" }, { status: 404 });
     }
 
-    const tierName: string = participant.tiers?.name ?? "Unknown";
+    const tierName = getJoinedName(participant.tiers);
     const tierLower = tierName.toLowerCase();
 
     if (tierLower !== "the accelerator" && tierLower !== "the elite") {
@@ -142,7 +143,8 @@ export async function POST(request: Request) {
     }
 
     // Calculate the week's date range
-    const challengeStart = participant.challenges?.start_date;
+    const challengeJoin = participant.challenges;
+    const challengeStart = Array.isArray(challengeJoin) ? challengeJoin[0]?.start_date : challengeJoin?.start_date;
     let weekStart: string;
     let weekEnd: string;
 
@@ -176,7 +178,7 @@ export async function POST(request: Request) {
     }
 
     const intake = participant.intake_pre as { weight?: number; goal_weight?: number } | null;
-    const trackName: string = participant.tracks?.name ?? "Unknown";
+    const trackName = getJoinedName(participant.tracks);
 
     const prompt = buildWeeklyAnalysisPrompt(
       participant.name,

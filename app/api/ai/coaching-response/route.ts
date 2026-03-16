@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getJoinedName } from "@/lib/ai-utils";
 
 interface CheckinRecord {
   id: string;
@@ -204,12 +205,8 @@ export async function POST(request: Request) {
 
     const recentHistory: CheckinRecord[] = (history ?? []).reverse();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tracks = participant.tracks as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tiers = participant.tiers as any;
-    const trackName: string = (Array.isArray(tracks) ? tracks[0]?.name : tracks?.name) ?? "Unknown";
-    const tierName: string = (Array.isArray(tiers) ? tiers[0]?.name : tiers?.name) ?? "Unknown";
+    const trackName = getJoinedName(participant.tracks);
+    const tierName = getJoinedName(participant.tiers);
 
     const prompt = buildCoachingPrompt(
       participant as unknown as Participant,

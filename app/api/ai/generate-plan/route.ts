@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getJoinedName } from "@/lib/ai-utils";
 
 interface IntakeData {
   weight?: number;
@@ -242,8 +243,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const trackName: string = participant.tracks?.name ?? "Unknown";
-    const tierName: string = participant.tiers?.name ?? "Unknown";
+    const trackName = getJoinedName(participant.tracks);
+    const tierName = getJoinedName(participant.tiers);
 
     const intake: IntakeData =
       participant.intake_pre && typeof participant.intake_pre === "object"

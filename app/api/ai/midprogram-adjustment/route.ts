@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getJoinedName } from "@/lib/ai-utils";
 
 interface CheckinRecord {
   date: string;
@@ -162,7 +163,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Participant not found" }, { status: 404 });
     }
 
-    const tierName: string = participant.tiers?.name ?? "Unknown";
+    const tierName = getJoinedName(participant.tiers);
     const tierLower = tierName.toLowerCase();
 
     if (tierLower !== "the accelerator" && tierLower !== "the elite") {
@@ -173,7 +174,8 @@ export async function POST(request: Request) {
     }
 
     // Fetch all check-ins (first 4 weeks)
-    const challengeStart = participant.challenges?.start_date;
+    const challengeJoin = participant.challenges;
+    const challengeStart = Array.isArray(challengeJoin) ? challengeJoin[0]?.start_date : challengeJoin?.start_date;
     let dateFilter: { start: string; end: string } | null = null;
 
     if (challengeStart) {
@@ -204,7 +206,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to fetch check-ins: " + checkinError.message }, { status: 500 });
     }
 
-    const trackName: string = participant.tracks?.name ?? "Unknown";
+    const trackName = getJoinedName(participant.tracks);
     const intake = (participant.intake_pre as Record<string, unknown>) ?? {};
 
     const prompt = buildMidprogramPrompt(
