@@ -5,6 +5,8 @@ import GeneratePlanButton from "./GeneratePlanButton";
 import PaymentActions from "./PaymentActions";
 import CoachNotes from "./CoachNotes";
 import DashboardLink from "./DashboardLink";
+import EditParticipant from "./EditParticipant";
+import WelcomeEmail from "./WelcomeEmail";
 
 export default async function ParticipantDetail({
   params,
@@ -34,6 +36,16 @@ export default async function ParticipantDetail({
   if (error || !participant) {
     redirect("/admin/participants");
   }
+
+  // Fetch challenge tracks and tiers
+  const { data: challenge } = await supabase
+    .from("challenges")
+    .select("tracks(*), tiers(*)")
+    .eq("id", participant.challenge_id)
+    .single();
+
+  const tracks = (challenge?.tracks ?? []) as { id: string; name: string }[];
+  const tiers = (challenge?.tiers ?? []) as { id: string; name: string }[];
 
   // Fetch all checkins for this participant
   const { data: checkins } = await supabase
@@ -108,6 +120,17 @@ export default async function ParticipantDetail({
           {participant.status}
         </span>
       </div>
+
+      {/* Edit Participant */}
+      <EditParticipant
+        participantId={participant.id}
+        currentStatus={participant.status}
+        currentTrackId={participant.track_id ?? null}
+        currentTierId={participant.tier_id ?? null}
+        currentPaymentStatus={participant.payment_status ?? "unpaid"}
+        tracks={tracks}
+        tiers={tiers}
+      />
 
       {/* Generate Plan Button */}
       <div className="mb-8">
@@ -216,6 +239,21 @@ export default async function ParticipantDetail({
           </div>
         </div>
       </div>
+
+      {/* Welcome Email */}
+      {participant.magic_link_token && (participant.tracks as { name: string } | null)?.name && (participant.tiers as { name: string } | null)?.name && (
+        <div className="mb-8">
+          <WelcomeEmail
+            participant={{
+              name: participant.name,
+              email: participant.email,
+              magic_link_token: participant.magic_link_token,
+            }}
+            trackName={(participant.tracks as { name: string }).name}
+            tierName={(participant.tiers as { name: string }).name}
+          />
+        </div>
+      )}
 
       {/* Intake Data */}
       {intake && (

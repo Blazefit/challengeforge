@@ -2,8 +2,13 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import GenerateCoachingButton from "./GenerateCoachingButton";
+import DateNav from "./DateNav";
 
-export default async function CoachCheckins() {
+export default async function CoachCheckins({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -63,8 +68,9 @@ export default async function CoachCheckins() {
 
   const activeParticipants = participants ?? [];
 
-  // Today's checkins (Eastern Time)
-  const today = new Date().toLocaleDateString("en-CA", {
+  // Date from search params or today (Eastern Time)
+  const resolvedParams = await searchParams;
+  const today = resolvedParams.date || new Date().toLocaleDateString("en-CA", {
     timeZone: "America/New_York",
   });
 
@@ -92,7 +98,7 @@ export default async function CoachCheckins() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Check-Ins</h1>
-        <span className="text-sm text-gray-500">{today}</span>
+        <DateNav currentDate={today} />
       </div>
 
       {/* Stats Bar */}

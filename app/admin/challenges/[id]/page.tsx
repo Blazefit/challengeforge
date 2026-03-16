@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import BulkGeneratePlans from "./BulkGeneratePlans";
+import EditChallenge from "./EditChallenge";
 
 export default async function ChallengePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -260,6 +261,16 @@ export default async function ChallengePage({ params }: { params: Promise<{ id: 
           </div>
         </div>
       )}
+
+      {/* Challenge Settings */}
+      <EditChallenge challenge={{
+        id: challenge.id,
+        name: challenge.name,
+        slug: challenge.slug,
+        status: challenge.status,
+        start_date: challenge.start_date,
+        end_date: challenge.end_date,
+      }} />
     </div>
   );
 }

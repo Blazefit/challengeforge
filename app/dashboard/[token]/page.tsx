@@ -95,6 +95,17 @@ export default async function ParticipantDashboard({
       </div>
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
+        {/* Intake CTA (show if no intake data) */}
+        {!intake?.weight && (
+          <Link
+            href={`/dashboard/${token}/intake`}
+            className="block w-full p-4 rounded-xl text-center font-medium bg-yellow-900/30 border-2 border-yellow-700 text-yellow-400 hover:bg-yellow-900/50 transition-colors"
+          >
+            Complete Your Intake Form
+            <span className="block text-xs text-yellow-500 mt-1">Required before your first check-in</span>
+          </Link>
+        )}
+
         {/* Check-in CTA */}
         <Link
           href={`/dashboard/${token}/checkin`}
