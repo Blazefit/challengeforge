@@ -8,6 +8,7 @@ import DashboardLink from "./DashboardLink";
 import EditParticipant from "./EditParticipant";
 import AiReadiness from "./AiReadiness";
 import WelcomeEmail from "./WelcomeEmail";
+import AiActionButton from "./AiActionButton";
 
 export default async function ParticipantDetail({
   params,
@@ -406,6 +407,140 @@ export default async function ParticipantDetail({
           />
         </div>
       )}
+
+      {/* Additional AI Content */}
+      {(() => {
+        const tierName = (participant.tiers as { name: string } | null)?.name?.toLowerCase() ?? "";
+        const isAccelOrElite = tierName === "the accelerator" || tierName === "the elite";
+        const isElite = tierName === "the elite";
+
+        return (
+          <div className="space-y-6 mb-8">
+            {/* Meal Plan - Elite only */}
+            {isElite && (
+              <details className="bg-white rounded-xl border border-gray-200 shadow-sm group">
+                <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                  <span>AI Meal Plan (Elite)</span>
+                  <AiActionButton
+                    participantId={participant.id}
+                    endpoint="/api/ai/meal-plan"
+                    label="Generate Meal Plan"
+                    regenerateLabel="Regenerate"
+                    hasContent={!!participant.ai_meal_plan}
+                  />
+                </summary>
+                {participant.ai_meal_plan ? (
+                  <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap">{participant.ai_meal_plan}</div>
+                  </div>
+                ) : (
+                  <div className="px-6 pb-6 text-sm text-gray-400 border-t border-gray-100 pt-4">
+                    No meal plan generated yet. Click &quot;Generate Meal Plan&quot; above.
+                  </div>
+                )}
+              </details>
+            )}
+
+            {/* Workout Modifications - Accelerator + Elite */}
+            {isAccelOrElite && (
+              <details className="bg-white rounded-xl border border-gray-200 shadow-sm group">
+                <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                  <span>AI Workout Modifications</span>
+                  <AiActionButton
+                    participantId={participant.id}
+                    endpoint="/api/ai/workout-mod"
+                    label="Generate Modifications"
+                    regenerateLabel="Regenerate"
+                    hasContent={!!participant.ai_workout_mod}
+                  />
+                </summary>
+                {participant.ai_workout_mod ? (
+                  <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap">{participant.ai_workout_mod}</div>
+                  </div>
+                ) : (
+                  <div className="px-6 pb-6 text-sm text-gray-400 border-t border-gray-100 pt-4">
+                    No workout modifications generated yet.
+                  </div>
+                )}
+              </details>
+            )}
+
+            {/* Weekly Analysis - Accelerator + Elite */}
+            {isAccelOrElite && (
+              <details className="bg-white rounded-xl border border-gray-200 shadow-sm group">
+                <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                  <span>AI Weekly Analysis</span>
+                  <AiActionButton
+                    participantId={participant.id}
+                    endpoint="/api/ai/weekly-analysis"
+                    label="Generate This Week"
+                    regenerateLabel="Generate Next Week"
+                    hasContent={!!participant.ai_weekly_analysis}
+                  />
+                </summary>
+                {participant.ai_weekly_analysis ? (
+                  <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap">{participant.ai_weekly_analysis}</div>
+                  </div>
+                ) : (
+                  <div className="px-6 pb-6 text-sm text-gray-400 border-t border-gray-100 pt-4">
+                    No weekly analysis generated yet.
+                  </div>
+                )}
+              </details>
+            )}
+
+            {/* Mid-Program Adjustment - Accelerator + Elite */}
+            {isAccelOrElite && (
+              <details className="bg-white rounded-xl border border-gray-200 shadow-sm group">
+                <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                  <span>AI Mid-Program Adjustment (Week 4)</span>
+                  <AiActionButton
+                    participantId={participant.id}
+                    endpoint="/api/ai/midprogram-adjustment"
+                    label="Generate Adjustment"
+                    regenerateLabel="Regenerate"
+                    hasContent={!!participant.ai_midprogram_adjustment}
+                  />
+                </summary>
+                {participant.ai_midprogram_adjustment ? (
+                  <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap">{participant.ai_midprogram_adjustment}</div>
+                  </div>
+                ) : (
+                  <div className="px-6 pb-6 text-sm text-gray-400 border-t border-gray-100 pt-4">
+                    No mid-program adjustment generated yet. Best generated at Week 4.
+                  </div>
+                )}
+              </details>
+            )}
+
+            {/* Murph Prep - All tiers */}
+            <details className="bg-white rounded-xl border border-gray-200 shadow-sm group">
+              <summary className="px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:text-red-600 transition-colors flex items-center justify-between">
+                <span>Murph Prep Strategy</span>
+                <AiActionButton
+                  participantId={participant.id}
+                  endpoint="/api/ai/murph-prep"
+                  label="Generate Murph Prep"
+                  regenerateLabel="Regenerate"
+                  hasContent={!!participant.ai_murph_prep}
+                />
+              </summary>
+              {participant.ai_murph_prep ? (
+                <div className="px-6 pb-6 text-sm text-gray-700 border-t border-gray-100 pt-4 prose prose-sm max-w-none">
+                  <div className="whitespace-pre-wrap">{participant.ai_murph_prep}</div>
+                </div>
+              ) : (
+                <div className="px-6 pb-6 text-sm text-gray-400 border-t border-gray-100 pt-4">
+                  No Murph prep strategy generated yet. Best generated at Week 5-6.
+                </div>
+              )}
+            </details>
+          </div>
+        );
+      })()}
 
       {/* Check-in History */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
