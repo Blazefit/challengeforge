@@ -2,7 +2,39 @@
 
 import { useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { ChallengeData, TrackData, TierData } from "./page";
+export interface TrackData {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  description: string;
+  calorie_strategy: string;
+  training_days: string;
+}
+
+export interface TierData {
+  id: string;
+  name: string;
+  price_cents: number;
+  earlybird_price_cents: number | null;
+  features: string[];
+  ai_plan_generation?: boolean;
+  ai_meal_plan?: boolean;
+  ai_daily_coaching?: boolean;
+}
+
+export interface ChallengeData {
+  id: string;
+  name: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  early_bird_ends: string | null;
+  gym: {
+    name: string;
+    logo_url?: string;
+  };
+}
 
 // ──────── Helpers ────────
 
