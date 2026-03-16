@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-const anthropic = new Anthropic(); // uses ANTHROPIC_API_KEY env var
 
 interface IntakeData {
   weight?: number;
@@ -128,28 +125,47 @@ export async function POST(request: Request) {
 
     const prompt = buildPrompt(participant.name, trackName, tierName, intake);
 
-    // Call Claude API
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4000,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    });
-
-    // Extract text content from the response
-    const textBlock = message.content.find((block) => block.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
+    // Call OpenRouter API
+    const openRouterKey = process.env.OPENROUTER_API_KEY;
+    if (!openRouterKey) {
       return NextResponse.json(
-        { error: "No text content in AI response" },
+        { error: "OPENROUTER_API_KEY not configured" },
         { status: 500 }
       );
     }
 
-    const fullResponse = textBlock.text;
+    const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${openRouterKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "anthropic/claude-sonnet-4",
+        max_tokens: 4000,
+        messages: [
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      const errBody = await aiResponse.text();
+      return NextResponse.json(
+        { error: "OpenRouter API error: " + errBody },
+        { status: 500 }
+      );
+    }
+
+    const aiData = await aiResponse.json();
+    const fullResponse: string = aiData.choices?.[0]?.message?.content ?? "";
+
+    if (!fullResponse) {
+      return NextResponse.json(
+        { error: "No content in AI response" },
+        { status: 500 }
+      );
+    }
 
     // Split response into nutrition and training plans
     const trainingPlanMarker = "## Training Plan";
