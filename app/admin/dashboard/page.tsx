@@ -46,8 +46,9 @@ export default async function AdminDashboard() {
       withoutPlans: active.filter((p) => !p.ai_nutrition_plan).length,
     };
 
-    // At-risk: find participants who haven't checked in for 2+ days
-    if (active.length > 0) {
+    // At-risk: only after challenge has started
+    const challengeStarted = new Date(activeChallenge.start_date + "T00:00:00") <= new Date();
+    if (active.length > 0 && challengeStarted) {
       // Get all participants with track info for at-risk display
       const { data: fullParticipants } = await supabase
         .from("participants")
