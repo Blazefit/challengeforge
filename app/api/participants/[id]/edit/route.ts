@@ -27,6 +27,7 @@ export async function PUT(
     "track_id",
     "tier_id",
     "payment_status",
+    "starting_photos",
   ];
 
   const updates: Record<string, unknown> = {};

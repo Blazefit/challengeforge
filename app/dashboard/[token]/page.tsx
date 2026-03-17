@@ -115,32 +115,106 @@ export default async function ParticipantDashboard({
       />
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
-        {/* Intake CTA (show if no intake data) */}
-        {!intake?.weight && (
-          <Link
-            href={`/dashboard/${token}/intake`}
-            className="block w-full p-4 rounded-xl text-center font-medium bg-yellow-900/30 border-2 border-yellow-700 text-yellow-400 hover:bg-yellow-900/50 transition-colors"
-          >
-            Complete Your Intake Form
-            <span className="block text-xs text-yellow-500 mt-1">Required before your first check-in</span>
-          </Link>
-        )}
+        {/* Post-Challenge Completion Screen */}
+        {(() => {
+          const now = new Date();
+          const endDate = challenge?.end_date ? new Date(challenge.end_date + "T23:59:59") : null;
+          const startDate = challenge?.start_date ? new Date(challenge.start_date + "T00:00:00") : null;
+          const challengeEnded = endDate && now > endDate;
+          const challengeNotStarted = startDate && now < startDate;
 
-        {/* Check-in CTA */}
-        <Link
-          href={`/dashboard/${token}/checkin`}
-          className={`block w-full p-5 rounded-xl text-center font-bold text-lg transition-all ${
-            checkedInToday
-              ? "bg-green-900/30 border-2 border-green-700 text-green-400"
-              : "bg-red-600 hover:bg-red-700 text-white"
-          }`}
-        >
-          {checkedInToday ? (
-            <>&#10003; Checked In Today</>
-          ) : (
-            <>Check In Now</>
-          )}
-        </Link>
+          if (challengeEnded) {
+            return (
+              <div className="bg-gradient-to-b from-green-900/30 to-gray-900 rounded-2xl border-2 border-green-700 p-6 text-center">
+                <p className="text-5xl mb-3">&#127942;</p>
+                <h2 className="text-2xl font-bold text-green-400 mb-2">Challenge Complete!</h2>
+                <p className="text-gray-400 mb-1">You made it through {challenge?.name}.</p>
+                <div className="grid grid-cols-3 gap-3 my-5">
+                  <div className="bg-gray-800 rounded-lg p-3">
+                    <p className="text-xl font-bold text-white">{checkins.length}</p>
+                    <p className="text-[10px] text-gray-500">Check-ins</p>
+                  </div>
+                  <div className="bg-gray-800 rounded-lg p-3">
+                    <p className="text-xl font-bold text-white">{consistency}%</p>
+                    <p className="text-[10px] text-gray-500">Consistency</p>
+                  </div>
+                  <div className="bg-gray-800 rounded-lg p-3">
+                    <p className="text-xl font-bold text-white">{weightChange !== null ? `${weightChange > 0 ? "+" : ""}${weightChange.toFixed(1)}` : "—"}</p>
+                    <p className="text-[10px] text-gray-500">Lbs Change</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Link href={`/dashboard/${token}/progress`} className="flex-1 py-3 bg-green-700 rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">View My Results</Link>
+                  <Link href={`/dashboard/${token}/leaderboard`} className="flex-1 py-3 bg-gray-700 rounded-xl text-sm font-medium hover:bg-gray-600 transition-colors">Final Leaderboard</Link>
+                </div>
+                {participant.ai_post_program && (
+                  <Link href={`/dashboard/${token}/progress`} className="block mt-3 text-sm text-green-400 hover:text-green-300">View Your Post-Program Transition Plan</Link>
+                )}
+              </div>
+            );
+          }
+
+          if (challengeNotStarted) {
+            const daysUntil = Math.ceil((startDate!.getTime() - now.getTime()) / 86400000);
+            return (
+              <div className="bg-gray-900 rounded-2xl border-2 border-yellow-700/50 p-6 text-center">
+                <p className="text-4xl mb-3">&#9203;</p>
+                <h2 className="text-xl font-bold text-yellow-400 mb-1">{daysUntil} Day{daysUntil !== 1 ? "s" : ""} Until Kickoff</h2>
+                <p className="text-gray-400 text-sm mb-4">{challenge?.name} starts {challenge?.start_date}. Use this time to prepare!</p>
+                <Link
+                  href={`/dashboard/${token}/intake`}
+                  className="block w-full py-4 bg-yellow-600 rounded-xl text-center font-bold hover:bg-yellow-700 transition-colors"
+                >
+                  Complete Your Intake Form
+                </Link>
+              </div>
+            );
+          }
+
+          return null;
+        })()}
+
+        {/* Intake CTA (show if no intake data and challenge is active) */}
+        {!intake?.weight && (() => {
+          const now = new Date();
+          const endDate = challenge?.end_date ? new Date(challenge.end_date + "T23:59:59") : null;
+          const challengeEnded = endDate && now > endDate;
+          if (challengeEnded) return null;
+          return (
+            <Link
+              href={`/dashboard/${token}/intake`}
+              className="block w-full p-4 rounded-xl text-center font-medium bg-yellow-900/30 border-2 border-yellow-700 text-yellow-400 hover:bg-yellow-900/50 transition-colors"
+            >
+              Complete Your Intake Form
+              <span className="block text-xs text-yellow-500 mt-1">Required before your first check-in</span>
+            </Link>
+          );
+        })()}
+
+        {/* Check-in CTA (only during active challenge) */}
+        {(() => {
+          const now = new Date();
+          const startDate = challenge?.start_date ? new Date(challenge.start_date + "T00:00:00") : null;
+          const endDate = challenge?.end_date ? new Date(challenge.end_date + "T23:59:59") : null;
+          const isActive = (!startDate || now >= startDate) && (!endDate || now <= endDate);
+          if (!isActive) return null;
+          return (
+            <Link
+              href={`/dashboard/${token}/checkin`}
+              className={`block w-full p-5 rounded-xl text-center font-bold text-lg transition-all ${
+                checkedInToday
+                  ? "bg-green-900/30 border-2 border-green-700 text-green-400"
+                  : "bg-red-600 hover:bg-red-700 text-white"
+              }`}
+            >
+              {checkedInToday ? (
+                <>&#10003; Checked In Today</>
+              ) : (
+                <>Check In Now</>
+              )}
+            </Link>
+          );
+        })()}
 
         {/* Streak */}
         {streak > 0 && (

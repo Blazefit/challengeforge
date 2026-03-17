@@ -14,6 +14,8 @@ export default function IntakeForm({ token, participantId, existingIntake }: Int
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [photos, setPhotos] = useState<Record<string, File | null>>({ front: null, side: null, back: null });
+  const [photoPreviews, setPhotoPreviews] = useState<Record<string, string | null>>({ front: null, side: null, back: null });
 
   // Initialize from existing intake or empty
   const v = (key: string): string => String(existingIntake?.[key] ?? "");
@@ -74,6 +76,36 @@ export default function IntakeForm({ token, participantId, existingIntake }: Int
         const data = await res.json();
         throw new Error(data.error || "Failed to save");
       }
+      // Upload starting photos if any were selected
+      const hasPhotos = photos.front || photos.side || photos.back;
+      if (hasPhotos) {
+        const photoUrls: Record<string, string> = {};
+        for (const angle of ["front", "side", "back"]) {
+          const file = photos[angle];
+          if (!file) continue;
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("participant_id", participantId);
+          try {
+            const uploadRes = await fetch("/api/checkin/photo", { method: "POST", body: formData });
+            if (uploadRes.ok) {
+              const uploadData = await uploadRes.json();
+              // Re-path for starting photos
+              photoUrls[angle] = uploadData.url;
+            }
+          } catch {
+            // Photo upload failure is non-blocking
+          }
+        }
+        if (Object.keys(photoUrls).length > 0) {
+          await fetch(`/api/participants/${participantId}/edit`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ starting_photos: photoUrls }),
+          }).catch(() => {});
+        }
+      }
+
       setSaved(true);
       setTimeout(() => {
         router.push(`/dashboard/${token}`);
@@ -406,6 +438,49 @@ export default function IntakeForm({ token, participantId, existingIntake }: Int
               </select>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Starting Photos */}
+      <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700">
+        <h3 className="text-sm font-semibold text-gray-300 mb-1">Starting Photos (Optional)</h3>
+        <p className="text-xs text-gray-500 mb-4">Front, side, and back photos help track your transformation.</p>
+        <div className="grid grid-cols-3 gap-3">
+          {(["front", "side", "back"] as const).map((angle) => (
+            <div key={angle} className="text-center">
+              {photoPreviews[angle] ? (
+                <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photoPreviews[angle]!} alt={angle} className="w-full aspect-[3/4] object-cover rounded-lg border border-gray-600" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (photoPreviews[angle]?.startsWith("blob:")) URL.revokeObjectURL(photoPreviews[angle]!);
+                      setPhotos((p) => ({ ...p, [angle]: null }));
+                      setPhotoPreviews((p) => ({ ...p, [angle]: null }));
+                    }}
+                    className="absolute top-1 right-1 bg-gray-900/80 text-white w-6 h-6 rounded-full text-xs hover:bg-red-600"
+                  >X</button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full aspect-[3/4] rounded-lg border-2 border-dashed border-gray-600 bg-gray-800 cursor-pointer hover:border-gray-500 transition-colors">
+                  <svg className="w-6 h-6 text-gray-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-[10px] text-gray-500">Add</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setPhotos((p) => ({ ...p, [angle]: file }));
+                      setPhotoPreviews((p) => ({ ...p, [angle]: URL.createObjectURL(file) }));
+                    }
+                  }} />
+                </label>
+              )}
+              <p className="text-xs text-gray-500 mt-1 capitalize">{angle}</p>
+            </div>
+          ))}
         </div>
       </div>
 

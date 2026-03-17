@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   // Look up participant by magic link token
   const { data: participant, error: pError } = await supabase
     .from("participants")
-    .select("id, tiers(name)")
+    .select("id, tiers(name), challenges(start_date, end_date)")
     .eq("magic_link_token", token)
     .single();
 
@@ -41,6 +41,19 @@ export async function POST(request: Request) {
   }
 
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
+  // Enforce challenge date boundaries
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const challengeJoin = (participant as any).challenges;
+  const startDate = Array.isArray(challengeJoin) ? challengeJoin[0]?.start_date : challengeJoin?.start_date;
+  const endDate = Array.isArray(challengeJoin) ? challengeJoin[0]?.end_date : challengeJoin?.end_date;
+
+  if (startDate && today < startDate) {
+    return NextResponse.json({ error: `Challenge hasn't started yet. Check-ins open ${startDate}.` }, { status: 400 });
+  }
+  if (endDate && today > endDate) {
+    return NextResponse.json({ error: "Challenge has ended. Check-ins are closed." }, { status: 400 });
+  }
 
   // Check if already checked in today
   const { data: existing } = await supabase

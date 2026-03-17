@@ -35,10 +35,60 @@ export default async function CheckInPage({
     .single();
 
   const tier = participant.tiers as { name: string } | null;
-  const intake = participant.intake_pre as { weight?: number } | null;
+  const challenge = participant.challenges as { start_date: string; end_date: string } | null;
+  const intake = participant.intake_pre as { weight?: number; age?: number; sex?: string; height?: string } | null;
   const lastWeight = lastCheckin?.weight || intake?.weight || null;
   const isLastTenTrack = track?.name === "Last 10";
   const isElite = tier?.name?.toLowerCase() === "the elite";
+
+  // Check challenge date boundaries
+  const challengeNotStarted = challenge?.start_date && today < challenge.start_date;
+  const challengeEnded = challenge?.end_date && today > challenge.end_date;
+
+  // Check intake completion (minimum required fields)
+  const intakeIncomplete = !intake?.weight || !intake?.age || !intake?.sex || !intake?.height;
+
+  if (challengeNotStarted) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center px-4">
+        <div className="max-w-md text-center">
+          <p className="text-5xl mb-4">&#128197;</p>
+          <h1 className="text-xl font-bold mb-2">Challenge Hasn&apos;t Started Yet</h1>
+          <p className="text-gray-400 mb-2">Check-ins open on <span className="text-white font-semibold">{challenge.start_date}</span></p>
+          <p className="text-gray-500 text-sm mb-6">Use this time to complete your intake form and get familiar with your dashboard.</p>
+          <a href={`/dashboard/${token}`} className="inline-block px-6 py-3 bg-red-600 rounded-xl font-medium hover:bg-red-700 transition-colors">Back to Dashboard</a>
+        </div>
+      </div>
+    );
+  }
+
+  if (challengeEnded) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center px-4">
+        <div className="max-w-md text-center">
+          <p className="text-5xl mb-4">&#127942;</p>
+          <h1 className="text-xl font-bold mb-2">Challenge Complete!</h1>
+          <p className="text-gray-400 mb-2">The challenge ended on <span className="text-white font-semibold">{challenge.end_date}</span></p>
+          <p className="text-gray-500 text-sm mb-6">Check-ins are now closed. Visit your dashboard to see your final results.</p>
+          <a href={`/dashboard/${token}`} className="inline-block px-6 py-3 bg-red-600 rounded-xl font-medium hover:bg-red-700 transition-colors">View My Results</a>
+        </div>
+      </div>
+    );
+  }
+
+  if (intakeIncomplete) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center px-4">
+        <div className="max-w-md text-center">
+          <p className="text-5xl mb-4">&#128203;</p>
+          <h1 className="text-xl font-bold mb-2">Complete Your Intake First</h1>
+          <p className="text-gray-400 mb-2">We need your basic info before you can check in.</p>
+          <p className="text-gray-500 text-sm mb-6">Fill in your weight, age, sex, and height — takes less than a minute.</p>
+          <a href={`/dashboard/${token}/intake`} className="inline-block px-6 py-3 bg-yellow-600 rounded-xl font-medium hover:bg-yellow-700 transition-colors">Complete Intake Form</a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
