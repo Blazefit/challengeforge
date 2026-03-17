@@ -47,46 +47,58 @@ export default async function AdminDashboard() {
     };
 
     // At-risk: find participants who haven't checked in for 2+ days
-    const twoDaysAgo = new Date();
-    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-    const twoDaysAgoStr = twoDaysAgo.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    if (active.length > 0) {
+      // Get all participants with track info for at-risk display
+      const { data: fullParticipants } = await supabase
+        .from("participants")
+        .select("id, name, email, tracks(name)")
+        .eq("challenge_id", activeChallenge.id)
+        .eq("status", "active");
 
-    // Get all participants with track info for at-risk display
-    const { data: fullParticipants } = await supabase
-      .from("participants")
-      .select("id, name, email, tracks(name)")
-      .eq("challenge_id", activeChallenge.id)
-      .eq("status", "active");
+      // Get each participant's most recent check-in
+      const { data: latestCheckins, error: checkinError } = await supabase
+        .from("checkins")
+        .select("participant_id, date")
+        .in("participant_id", active.map((p) => p.id))
+        .order("date", { ascending: false });
 
-    const { data: recentCheckins } = await supabase
-      .from("checkins")
-      .select("participant_id, date")
-      .in("participant_id", active.map((p) => p.id))
-      .gte("date", twoDaysAgoStr)
-      .order("date", { ascending: false });
+      if (!checkinError) {
+        const lastCheckinMap = new Map<string, string>();
+        (latestCheckins ?? []).forEach((c) => {
+          if (!lastCheckinMap.has(c.participant_id)) {
+            lastCheckinMap.set(c.participant_id, c.date);
+          }
+        });
 
-    const lastCheckinMap = new Map<string, string>();
-    (recentCheckins ?? []).forEach((c) => {
-      if (!lastCheckinMap.has(c.participant_id)) {
-        lastCheckinMap.set(c.participant_id, c.date);
+        const todayMs = new Date().getTime();
+
+        atRiskParticipants = (fullParticipants ?? [])
+          .map((p) => {
+            const lastDate = lastCheckinMap.get(p.id);
+            let daysMissed: number;
+            if (lastDate) {
+              daysMissed = Math.floor((todayMs - new Date(lastDate + "T00:00:00").getTime()) / 86400000);
+            } else {
+              // Never checked in — calculate from challenge start
+              daysMissed = Math.floor((todayMs - new Date(activeChallenge.start_date + "T00:00:00").getTime()) / 86400000);
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tracks = p.tracks as any;
+            const trackName = Array.isArray(tracks) ? tracks[0]?.name : tracks?.name;
+            return {
+              id: p.id,
+              name: p.name,
+              email: p.email,
+              daysMissed,
+              trackName: trackName ?? "Unknown",
+            };
+          })
+          .filter((p) => p.daysMissed >= 2)
+          .sort((a, b) => b.daysMissed - a.daysMissed)
+          .slice(0, 10);
       }
-    });
-
-    atRiskParticipants = (fullParticipants ?? [])
-      .filter((p) => !lastCheckinMap.has(p.id))
-      .map((p) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const tracks = p.tracks as any;
-        const trackName = Array.isArray(tracks) ? tracks[0]?.name : tracks?.name;
-        return {
-          id: p.id,
-          name: p.name,
-          email: p.email,
-          daysMissed: 2,
-          trackName: trackName ?? "Unknown",
-        };
-      })
-      .slice(0, 10);
+    }
   }
 
   // Days until challenge starts or ends

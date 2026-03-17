@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 interface Props {
@@ -34,6 +34,15 @@ export default function CheckinForm({ token, lastWeight, showSteps, isElite, par
   const [mealPhoto, setMealPhoto] = useState<File | null>(null);
   const [mealPhotoPreview, setMealPhotoPreview] = useState<string | null>(existing?.meal_photo_url || null);
 
+  // Clean up blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (mealPhotoPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(mealPhotoPreview);
+      }
+    };
+  }, [mealPhotoPreview]);
+
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,13 +59,24 @@ export default function CheckinForm({ token, lastWeight, showSteps, isElite, par
         const formData = new FormData();
         formData.append("file", mealPhoto);
         formData.append("participant_id", participantId);
-        const uploadRes = await fetch("/api/checkin/photo", {
-          method: "POST",
-          body: formData,
-        });
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          mealPhotoUrl = uploadData.url;
+        try {
+          const uploadRes = await fetch("/api/checkin/photo", {
+            method: "POST",
+            body: formData,
+          });
+          if (uploadRes.ok) {
+            const uploadData = await uploadRes.json();
+            mealPhotoUrl = uploadData.url;
+          } else {
+            const errData = await uploadRes.json().catch(() => ({}));
+            setError(errData.error || "Photo upload failed. Try again or skip the photo.");
+            setSubmitting(false);
+            return;
+          }
+        } catch {
+          setError("Photo upload failed. Check your connection.");
+          setSubmitting(false);
+          return;
         }
       }
 

@@ -261,7 +261,19 @@ interface BroadcastEmailParams {
   body: string;
 }
 
+function htmlEscape(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export async function sendBroadcastEmail({ to, subject, body }: BroadcastEmailParams) {
+  if (!to || to.length === 0) {
+    return { success: false, error: "No recipients specified" };
+  }
+
   try {
     const { data, error } = await getResend().batch.send(
       to.map((email) => ({
@@ -274,7 +286,7 @@ export async function sendBroadcastEmail({ to, subject, body }: BroadcastEmailPa
             <h1 style="color: white; margin: 0; font-size: 20px;">ChallengeForge</h1>
           </div>
           <div style="background: #fff; border: 1px solid #e5e7eb; border-top: none; padding: 30px; border-radius: 0 0 12px 12px;">
-            <div style="color: #374151; line-height: 1.7; white-space: pre-wrap;">${body.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+            <div style="color: #374151; line-height: 1.7; white-space: pre-wrap;">${htmlEscape(body)}</div>
           </div>
         </div>`,
       }))
