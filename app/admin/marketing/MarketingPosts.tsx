@@ -314,9 +314,13 @@ function StatusToggle({
 export default function MarketingPosts({
   challenge,
   gymName,
+  challengeId,
+  savedStatuses,
 }: {
   challenge: Challenge;
   gymName: string;
+  challengeId: string;
+  savedStatuses: Record<string, string>;
 }) {
   const posts = useMemo(
     () => generatePosts(challenge, gymName),
@@ -326,10 +330,13 @@ export default function MarketingPosts({
   const [statuses, setStatuses] = useState<Record<number, PostStatus>>(() => {
     const initial: Record<number, PostStatus> = {};
     posts.forEach((p) => {
-      initial[p.number] = "draft";
+      const saved = savedStatuses[String(p.number)] as PostStatus | undefined;
+      initial[p.number] = saved && statusOrder.includes(saved) ? saved : "draft";
     });
     return initial;
   });
+
+  const [saving, setSaving] = useState(false);
 
   const [filterPhase, setFilterPhase] = useState<"all" | PostData["phase"]>("all");
 
@@ -344,13 +351,30 @@ export default function MarketingPosts({
     return c;
   }, [statuses]);
 
-  const updateStatus = (postNumber: number, newStatus: PostStatus) => {
-    setStatuses((prev) => ({ ...prev, [postNumber]: newStatus }));
+  const updateStatus = async (postNumber: number, newStatus: PostStatus) => {
+    const updated = { ...statuses, [postNumber]: newStatus };
+    setStatuses(updated);
+
+    // Persist to DB
+    setSaving(true);
+    try {
+      const dbStatuses: Record<string, string> = {};
+      Object.entries(updated).forEach(([k, v]) => { dbStatuses[k] = v; });
+      await fetch(`/api/challenges/${challengeId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ marketing_statuses: dbStatuses }),
+      });
+    } catch {
+      // Silent fail — status is updated locally regardless
+    }
+    setSaving(false);
   };
 
   return (
     <div>
       {/* Stats Bar */}
+      {saving && <p className="text-xs text-gray-400 mb-2 text-right">Saving...</p>}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4">
           <p className="text-sm text-gray-500">Drafts</p>

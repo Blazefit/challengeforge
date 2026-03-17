@@ -40,7 +40,7 @@ export default async function Marketing() {
 
   const { data: challenge } = await supabase
     .from("challenges")
-    .select("id, name, slug, start_date, end_date, status, early_bird_ends, tracks(id, name, description), tiers(id, name, price_cents)")
+    .select("id, name, slug, start_date, end_date, status, early_bird_ends, marketing_statuses, tracks(id, name, description), tiers(id, name, price_cents)")
     .eq("gym_id", gym?.id ?? "")
     .order("created_at", { ascending: false })
     .limit(1)
@@ -95,7 +95,12 @@ export default async function Marketing() {
         </Link>
       </div>
 
-      <MarketingPosts challenge={typedChallenge} gymName={gym?.name ?? "Your Gym"} />
+      <MarketingPosts
+        challenge={typedChallenge}
+        gymName={gym?.name ?? "Your Gym"}
+        challengeId={challenge.id}
+        savedStatuses={(challenge.marketing_statuses as Record<string, string>) ?? {}}
+      />
     </div>
   );
 }
