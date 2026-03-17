@@ -132,6 +132,8 @@ export default function CheckinForm({ token, lastWeight, showSteps, isElite, par
         <input
           type="number"
           step="0.1"
+          min="50"
+          max="600"
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
           placeholder={lastWeight?.toString() || "175"}

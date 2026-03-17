@@ -270,6 +270,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ id: 
         status: challenge.status,
         start_date: challenge.start_date,
         end_date: challenge.end_date,
+        announcement: challenge.announcement ?? null,
       }} />
     </div>
   );

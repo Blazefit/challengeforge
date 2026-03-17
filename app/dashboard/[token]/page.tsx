@@ -21,7 +21,7 @@ export default async function ParticipantDashboard({
   const supabase = createAdminClient();
   const track = participant.tracks as { name: string; icon: string; color: string; scoring_direction: string } | null;
   const tier = participant.tiers as { name: string } | null;
-  const challenge = participant.challenges as { id: string; name: string; start_date: string; end_date: string } | null;
+  const challenge = participant.challenges as { id: string; name: string; start_date: string; end_date: string; announcement?: string } | null;
 
   // Fetch this participant's checkins
   const { data: myCheckins } = await supabase
@@ -115,6 +115,14 @@ export default async function ParticipantDashboard({
       />
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
+        {/* Coach Announcement */}
+        {challenge?.announcement && (
+          <div className="bg-red-900/30 border border-red-700 rounded-xl p-4">
+            <p className="text-xs text-red-400 font-semibold uppercase tracking-wide mb-1">Coach Announcement</p>
+            <p className="text-sm text-gray-200 whitespace-pre-wrap">{challenge.announcement}</p>
+          </div>
+        )}
+
         {/* Post-Challenge Completion Screen */}
         {(() => {
           const now = new Date();

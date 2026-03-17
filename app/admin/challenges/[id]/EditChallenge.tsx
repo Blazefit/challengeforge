@@ -11,6 +11,7 @@ interface EditChallengeProps {
     status: string;
     start_date: string;
     end_date: string;
+    announcement?: string | null;
   };
 }
 
@@ -21,6 +22,7 @@ export default function EditChallenge({ challenge }: EditChallengeProps) {
   const [status, setStatus] = useState(challenge.status);
   const [startDate, setStartDate] = useState(challenge.start_date);
   const [endDate, setEndDate] = useState(challenge.end_date);
+  const [announcement, setAnnouncement] = useState(challenge.announcement || "");
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
@@ -38,6 +40,7 @@ export default function EditChallenge({ challenge }: EditChallengeProps) {
           status,
           start_date: startDate,
           end_date: endDate,
+          announcement: announcement.trim() || null,
         }),
       });
 
@@ -146,6 +149,24 @@ export default function EditChallenge({ challenge }: EditChallengeProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
+        </div>
+
+        {/* Announcement Banner */}
+        <div>
+          <label htmlFor="challenge-announcement" className="block text-sm font-medium text-gray-700 mb-1">
+            Participant Announcement
+          </label>
+          <textarea
+            id="challenge-announcement"
+            value={announcement}
+            onChange={(e) => setAnnouncement(e.target.value)}
+            rows={3}
+            placeholder="Set an announcement that shows on all participant dashboards (leave empty to hide)"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            {announcement.trim() ? "This message is visible to all participants right now." : "No announcement set. Participants won't see anything."}
+          </p>
         </div>
 
         <div className="flex justify-end pt-2">

@@ -18,6 +18,7 @@ export async function PUT(
   if (body.status !== undefined) updates.status = body.status;
   if (body.start_date !== undefined) updates.start_date = body.start_date;
   if (body.end_date !== undefined) updates.end_date = body.end_date;
+  if (body.announcement !== undefined) updates.announcement = body.announcement;
 
   const { data, error } = await supabase
     .from("challenges")

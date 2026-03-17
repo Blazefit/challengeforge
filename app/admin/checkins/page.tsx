@@ -78,7 +78,8 @@ export default async function CoachCheckins({
   const { data: checkins } = await supabase
     .from("checkins")
     .select("*, participants(name, email, tracks(name, icon, color))")
-    .eq("date", today);
+    .eq("date", today)
+    .in("participant_id", activeParticipants.map((p) => p.id));
 
   const todayCheckins = checkins ?? [];
   const checkinIdsWithoutFeedback = todayCheckins

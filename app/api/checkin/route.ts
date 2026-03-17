@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJoinedName } from "@/lib/ai-utils";
+import { rateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 function shouldAutoCoach(tierName: string): boolean {
@@ -27,6 +28,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing token" }, { status: 400 });
   }
 
+  // Rate limit: 30 requests per minute per token
+  if (!rateLimit(`checkin:${token}`, 30, 60_000)) {
+    return NextResponse.json({ error: "Too many requests. Please wait a moment." }, { status: 429 });
+  }
+
   const supabase = createAdminClient();
 
   // Look up participant by magic link token
@@ -47,6 +53,14 @@ export async function POST(request: Request) {
   const challengeJoin = (participant as any).challenges;
   const startDate = Array.isArray(challengeJoin) ? challengeJoin[0]?.start_date : challengeJoin?.start_date;
   const endDate = Array.isArray(challengeJoin) ? challengeJoin[0]?.end_date : challengeJoin?.end_date;
+
+  // Validate weight range
+  if (weight) {
+    const w = Number(weight);
+    if (isNaN(w) || w < 50 || w > 600) {
+      return NextResponse.json({ error: "Weight must be between 50 and 600 lbs" }, { status: 400 });
+    }
+  }
 
   if (startDate && today < startDate) {
     return NextResponse.json({ error: `Challenge hasn't started yet. Check-ins open ${startDate}.` }, { status: 400 });

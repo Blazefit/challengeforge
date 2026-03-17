@@ -12,12 +12,11 @@ export async function OPTIONS() {
   return NextResponse.json(null, { headers: corsHeaders });
 }
 
-// Tier ID → price info
-const TIER_PRICES: Record<string, { cents: number; label: string }> = {
-  "97e3b54e-47c5-41b2-9702-355adcee94d1": { cents: 9900, label: "$99" },
-  "67df8de0-b7cf-4b40-a954-6a60d99b075b": { cents: 19900, label: "$199" },
-  "1f7ada0c-d6f6-4f94-b788-f7e705340240": { cents: 39900, label: "$399" },
-};
+// Tier price label helper
+function formatPrice(cents: number | null): string {
+  if (!cents) return "TBD";
+  return `$${(cents / 100).toFixed(0)}`;
+}
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -34,9 +33,15 @@ export async function POST(request: Request) {
     goal_weight: goal_weight ? Number(goal_weight) : (intake_pre?.goal_weight ?? null),
   };
 
-  const tierInfo = TIER_PRICES[tier_id] ?? { cents: null, label: "TBD" };
-
   const supabase = createAdminClient();
+
+  // Fetch tier price from DB
+  const { data: tierRow } = await supabase
+    .from("tiers")
+    .select("price_cents")
+    .eq("id", tier_id)
+    .single();
+  const invoiceCents = tierRow?.price_cents ?? null;
 
   // Insert participant
   const { data, error } = await supabase
@@ -51,7 +56,7 @@ export async function POST(request: Request) {
       intake_pre: intakeData,
       status: "active",
       payment_status: "unpaid",
-      invoice_amount_cents: tierInfo.cents,
+      invoice_amount_cents: invoiceCents,
     })
     .select("id, magic_link_token")
     .single();
@@ -101,7 +106,7 @@ export async function POST(request: Request) {
       phone: phone || undefined,
       trackName,
       tierName,
-      tierPrice: tierInfo.label,
+      tierPrice: formatPrice(invoiceCents),
       weight: weight ? Number(weight) : undefined,
       goalWeight: goal_weight ? Number(goal_weight) : undefined,
       adminUrl,
