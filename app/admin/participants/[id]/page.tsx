@@ -124,6 +124,68 @@ export default async function ParticipantDetail({
         </span>
       </div>
 
+      {/* Tier Benefits Quick Reference */}
+      {participant.tiers?.name && (() => {
+        const tn = (participant.tiers as { name: string }).name.toLowerCase();
+        const trackName = (participant.tracks as { name: string } | null)?.name ?? "";
+
+        const trackBenefits: Record<string, string[]> = {
+          "hard gainer": ["Caloric surplus plan (+500 cal)", "Strength-focused programming", "3 strength sessions/week min", "Progressive overload tracking"],
+          "last 10": ["Precision deficit plan (-300-500 cal)", "Carb cycling on training days", "10K daily step target", "Metabolic conditioning focus"],
+          "transformer": ["Maintenance/slight deficit calories", "Scaled workouts for all levels", "Habit-building focus", "Sustainable routine design"],
+        };
+
+        const tierBenefits: Record<string, { color: string; items: string[] }> = {
+          "the plan": {
+            color: "border-gray-200 bg-gray-50",
+            items: ["AI nutrition + training plan", "Daily check-ins", "Leaderboard access", "Murph prep guide"],
+          },
+          "the accelerator": {
+            color: "border-blue-200 bg-blue-50",
+            items: ["Everything in The Plan", "Weekly AI performance analysis", "Custom workout modifications", "Mid-program macro adjustment", "AI coaching on check-ins", "Meal substitution support"],
+          },
+          "the elite": {
+            color: "border-purple-200 bg-purple-50",
+            items: ["Everything in Accelerator", "Custom 7-day meal plan", "Daily AI coaching feedback", "Meal photo analysis", "Supplement recommendations", "Post-program transition plan"],
+          },
+        };
+
+        const tier = tierBenefits[tn];
+        const track = trackBenefits[trackName.toLowerCase()];
+        if (!tier) return null;
+
+        return (
+          <div className={`rounded-xl border ${tier.color} p-4 mb-6`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {track && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{trackName} Track Includes</p>
+                  <ul className="space-y-1">
+                    {track.map((item) => (
+                      <li key={item} className="text-xs text-gray-600 flex items-start gap-1.5">
+                        <span className="text-gray-400 mt-0.5">&#8226;</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{(participant.tiers as { name: string }).name} Tier Includes</p>
+                <ul className="space-y-1">
+                  {tier.items.map((item) => (
+                    <li key={item} className="text-xs text-gray-600 flex items-start gap-1.5">
+                      <span className="text-green-500 mt-0.5">&#10003;</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Edit Participant */}
       <EditParticipant
         participantId={participant.id}
