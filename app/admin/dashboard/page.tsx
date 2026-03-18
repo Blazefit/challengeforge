@@ -225,6 +225,7 @@ export default async function AdminDashboard() {
           startDate={activeChallenge.start_date}
           endDate={activeChallenge.end_date}
           challengeName={activeChallenge.name}
+          challengeId={activeChallenge.id}
           marketingStatuses={(activeChallenge.marketing_statuses as Record<string, string>) ?? {}}
         />
       )}
