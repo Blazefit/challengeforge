@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJoinedName } from "@/lib/ai-utils";
+import { logActivity } from "@/lib/activity-log";
 
 interface IntakeData {
   weight?: number;
@@ -326,6 +327,8 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    logActivity({ participantId, type: "ai_plan_generated", description: `Nutrition & training plan generated` });
 
     return NextResponse.json({ success: true, participant_id: participantId });
   } catch (err: unknown) {

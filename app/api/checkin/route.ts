@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJoinedName } from "@/lib/ai-utils";
 import { rateLimit } from "@/lib/rate-limit";
+import { logActivity } from "@/lib/activity-log";
 import { NextResponse } from "next/server";
 
 function shouldAutoCoach(tierName: string): boolean {
@@ -96,6 +97,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
+    logActivity({ participantId: participant.id, type: "checkin", description: `Daily check-in submitted` });
+
     // Auto-trigger AI coaching for Accelerator + Elite tiers
     const tierName = getJoinedName(participant.tiers);
     if (shouldAutoCoach(tierName)) {
@@ -122,6 +125,8 @@ export async function POST(request: Request) {
   if (insertError) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
+
+  logActivity({ participantId: participant.id, type: "checkin", description: `Daily check-in submitted` });
 
   // Auto-trigger AI coaching for Accelerator + Elite tiers
   const tierName = getJoinedName(participant.tiers);

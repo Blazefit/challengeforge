@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJoinedName } from "@/lib/ai-utils";
+import { logActivity } from "@/lib/activity-log";
 
 function buildPrompt(
   name: string,
@@ -164,6 +165,8 @@ export async function POST(request: Request) {
     if (updateError) {
       return NextResponse.json({ error: "Failed to save: " + updateError.message }, { status: 500 });
     }
+
+    logActivity({ participantId: participant_id, type: "ai_motivation", description: `Motivation message generated` });
 
     return NextResponse.json({ success: true, participant_id, week: weekNumber });
   } catch (err: unknown) {

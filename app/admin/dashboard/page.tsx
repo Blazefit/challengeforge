@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import ActivityFeed from "./ActivityFeed";
+import ChallengeTimeline from "./ChallengeTimeline";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -14,7 +15,7 @@ export default async function AdminDashboard() {
 
   const { data: challenges } = await supabase
     .from("challenges")
-    .select("id, name, slug, status, start_date, end_date")
+    .select("id, name, slug, status, start_date, end_date, marketing_statuses")
     .order("created_at", { ascending: false });
 
   // Get today's stats for the active challenge
@@ -216,6 +217,16 @@ export default async function AdminDashboard() {
             <p className="text-sm font-medium text-gray-900">Comms</p>
           </Link>
         </div>
+      )}
+
+      {/* Challenge Timeline */}
+      {activeChallenge && (
+        <ChallengeTimeline
+          startDate={activeChallenge.start_date}
+          endDate={activeChallenge.end_date}
+          challengeName={activeChallenge.name}
+          marketingStatuses={(activeChallenge.marketing_statuses as Record<string, string>) ?? {}}
+        />
       )}
 
       {/* At-Risk Athletes */}

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJoinedName } from "@/lib/ai-utils";
 import { sendWelcomeEmail } from "@/lib/email";
+import { logActivity } from "@/lib/activity-log";
 
 export async function POST(request: Request) {
   // Auth check
@@ -54,6 +55,8 @@ export async function POST(request: Request) {
   if (!result.success) {
     return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
   }
+
+  logActivity({ participantId: participant_id, type: "email_welcome", description: `Welcome email sent to ${participant.name}`, metadata: { email: participant.email } });
 
   return NextResponse.json({ success: true });
 }

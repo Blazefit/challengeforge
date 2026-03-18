@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWelcomeEmail, sendAdminSignupNotification } from "@/lib/email";
+import { logActivity } from "@/lib/activity-log";
 import { NextResponse } from "next/server";
 
 const corsHeaders = {
@@ -67,6 +68,8 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
   }
+
+  logActivity({ challengeId: challenge_id, participantId: data.id, type: "signup", description: `${name} signed up (${email})` });
 
   // Look up track, tier, and challenge names for emails
   const [trackResult, tierResult, challengeResult] = await Promise.all([

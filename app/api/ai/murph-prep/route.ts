@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJoinedName } from "@/lib/ai-utils";
+import { logActivity } from "@/lib/activity-log";
 
 interface IntakeData {
   weight?: number;
@@ -175,6 +176,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Failed to save Murph prep: " + updateError.message }, { status: 500 });
       }
 
+      logActivity({ participantId: participantId, type: "ai_murph_prep", description: `Murph prep strategy generated` });
+
       return NextResponse.json({ success: true, participant_id: participantId, type: "template" });
     }
 
@@ -231,6 +234,8 @@ export async function POST(request: Request) {
     if (updateError) {
       return NextResponse.json({ error: "Failed to save Murph prep: " + updateError.message }, { status: 500 });
     }
+
+    logActivity({ participantId: participantId, type: "ai_murph_prep", description: `Murph prep strategy generated` });
 
     return NextResponse.json({ success: true, participant_id: participantId, type: "ai_generated" });
   } catch (err: unknown) {

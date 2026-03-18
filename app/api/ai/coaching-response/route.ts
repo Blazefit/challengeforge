@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJoinedName } from "@/lib/ai-utils";
+import { logActivity } from "@/lib/activity-log";
 
 interface CheckinRecord {
   id: string;
@@ -272,6 +273,8 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    logActivity({ participantId: checkin.participant_id, type: "ai_coaching_response", description: `AI coaching feedback generated` });
 
     return NextResponse.json({ success: true, checkinId });
   } catch (err: unknown) {

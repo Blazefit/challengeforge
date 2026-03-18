@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendBroadcastEmail } from "@/lib/email";
+import { logActivity } from "@/lib/activity-log";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -25,6 +26,8 @@ export async function POST(request: Request) {
   if (!result.success) {
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
+
+  logActivity({ type: "email_broadcast", description: `Broadcast sent to ${recipientEmails.length} recipients`, metadata: { subject, recipientCount: recipientEmails.length } });
 
   return NextResponse.json({ success: true, count: recipientEmails.length });
 }

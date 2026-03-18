@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJoinedName } from "@/lib/ai-utils";
+import { logActivity } from "@/lib/activity-log";
 
 interface IntakeData {
   weight?: number;
@@ -198,6 +199,8 @@ export async function POST(request: Request) {
     if (updateError) {
       return NextResponse.json({ error: "Failed to save meal plan: " + updateError.message }, { status: 500 });
     }
+
+    logActivity({ participantId: participantId, type: "ai_meal_plan", description: `Custom meal plan generated` });
 
     return NextResponse.json({ success: true, participant_id: participantId });
   } catch (err: unknown) {

@@ -10,6 +10,7 @@ import AiReadiness from "./AiReadiness";
 import WelcomeEmail from "./WelcomeEmail";
 import AiActionButton from "./AiActionButton";
 import SendPlanEmail from "./SendPlanEmail";
+import ActivityTimeline from "./ActivityTimeline";
 
 export default async function ParticipantDetail({
   params,
@@ -229,6 +230,9 @@ export default async function ParticipantDetail({
         participantId={participant.id}
         initialNotes={participant.coach_notes ?? ""}
       />
+
+      {/* Activity Timeline */}
+      <ActivityTimeline participantId={participant.id} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Contact Info */}

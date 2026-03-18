@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJoinedName } from "@/lib/ai-utils";
+import { logActivity } from "@/lib/activity-log";
 
 interface CheckinRecord {
   date: string;
@@ -235,6 +236,8 @@ export async function POST(request: Request) {
     if (updateError) {
       return NextResponse.json({ error: "Failed to save weekly analysis: " + updateError.message }, { status: 500 });
     }
+
+    logActivity({ participantId: participantId, type: "ai_weekly_analysis", description: `Week ${weekNumber} analysis generated` });
 
     return NextResponse.json({ success: true, participant_id: participantId, week: weekNumber });
   } catch (err: unknown) {
