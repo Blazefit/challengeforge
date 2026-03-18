@@ -130,12 +130,67 @@ export default async function Participants() {
     };
   });
 
+  // Count participants by tier
+  const tierCounts: Record<string, number> = {};
+  enriched.forEach((p) => {
+    const t = p.tier_name ?? "No Tier";
+    tierCounts[t] = (tierCounts[t] ?? 0) + 1;
+  });
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Participants</h1>
         <ExportButton />
       </div>
+
+      {/* Tier Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-800">The Plan</h3>
+            <span className="text-2xl font-bold text-gray-900">{tierCounts["The Plan"] ?? 0}</span>
+          </div>
+          <ul className="space-y-1 text-xs text-gray-500">
+            <li className="flex items-start gap-1.5"><span className="text-green-500">&#10003;</span> AI nutrition + training plan</li>
+            <li className="flex items-start gap-1.5"><span className="text-green-500">&#10003;</span> Daily check-ins + leaderboard</li>
+            <li className="flex items-start gap-1.5"><span className="text-green-500">&#10003;</span> Murph prep guide (template)</li>
+            <li className="flex items-start gap-1.5"><span className="text-gray-300">&#10005;</span> <span className="text-gray-400">No coaching feedback</span></li>
+            <li className="flex items-start gap-1.5"><span className="text-gray-300">&#10005;</span> <span className="text-gray-400">No meal plan or workout mods</span></li>
+          </ul>
+        </div>
+
+        <div className="bg-white rounded-xl border border-blue-200 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-blue-800">The Accelerator</h3>
+            <span className="text-2xl font-bold text-blue-700">{tierCounts["The Accelerator"] ?? 0}</span>
+          </div>
+          <ul className="space-y-1 text-xs text-gray-500">
+            <li className="flex items-start gap-1.5"><span className="text-green-500">&#10003;</span> Everything in The Plan</li>
+            <li className="flex items-start gap-1.5"><span className="text-blue-500">&#10003;</span> Weekly AI performance analysis</li>
+            <li className="flex items-start gap-1.5"><span className="text-blue-500">&#10003;</span> Custom workout modifications</li>
+            <li className="flex items-start gap-1.5"><span className="text-blue-500">&#10003;</span> Mid-program macro adjustment</li>
+            <li className="flex items-start gap-1.5"><span className="text-blue-500">&#10003;</span> AI coaching on check-ins</li>
+            <li className="flex items-start gap-1.5"><span className="text-blue-500">&#10003;</span> Meal substitutions + supplements</li>
+          </ul>
+        </div>
+
+        <div className="bg-white rounded-xl border border-purple-200 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-purple-800">The Elite</h3>
+            <span className="text-2xl font-bold text-purple-700">{tierCounts["The Elite"] ?? 0}</span>
+          </div>
+          <ul className="space-y-1 text-xs text-gray-500">
+            <li className="flex items-start gap-1.5"><span className="text-green-500">&#10003;</span> Everything in Accelerator</li>
+            <li className="flex items-start gap-1.5"><span className="text-purple-500">&#10003;</span> Custom 7-day meal plan</li>
+            <li className="flex items-start gap-1.5"><span className="text-purple-500">&#10003;</span> Daily AI coaching feedback</li>
+            <li className="flex items-start gap-1.5"><span className="text-purple-500">&#10003;</span> Meal photo analysis</li>
+            <li className="flex items-start gap-1.5"><span className="text-purple-500">&#10003;</span> Supplement recommendations</li>
+            <li className="flex items-start gap-1.5"><span className="text-purple-500">&#10003;</span> Post-program transition plan</li>
+          </ul>
+        </div>
+      </div>
+
       <BulkActions participants={enriched.map((p) => ({ id: p.id, name: p.name }))} />
       <ContactList
         participants={enriched.map((p) => ({
