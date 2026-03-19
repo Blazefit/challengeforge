@@ -128,83 +128,58 @@ export default function ParticipantSearch({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+    <div style={{ background: "var(--surface-container-high)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
       {/* Search and Filters */}
-      <div className="px-6 py-4 border-b border-gray-100 space-y-3">
+      <div className="px-6 py-5 space-y-3">
         <input
           type="text"
           placeholder="Search by name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:border-red-300 focus:ring-1 focus:ring-red-300 outline-none"
+          className="ma-input"
         />
         <div className="flex flex-wrap items-center gap-3">
-          <select
-            value={trackFilter}
-            onChange={(e) => setTrackFilter(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:border-red-300 focus:ring-1 focus:ring-red-300 outline-none"
-          >
+          <select value={trackFilter} onChange={(e) => setTrackFilter(e.target.value)} className="ma-input" style={{ width: "auto" }}>
             <option value="All">All Tracks</option>
-            {tracks.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
+            {tracks.map((t) => (<option key={t} value={t}>{t}</option>))}
           </select>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:border-red-300 focus:ring-1 focus:ring-red-300 outline-none"
-          >
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="ma-input" style={{ width: "auto" }}>
             <option value="All">All Statuses</option>
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
             <option value="Dropped">Dropped</option>
           </select>
-          <select
-            value={paymentFilter}
-            onChange={(e) => setPaymentFilter(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:border-red-300 focus:ring-1 focus:ring-red-300 outline-none"
-          >
+          <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)} className="ma-input" style={{ width: "auto" }}>
             <option value="All">All Payments</option>
             <option value="paid">Paid</option>
             <option value="invoiced">Invoiced</option>
             <option value="unpaid">Unpaid</option>
           </select>
-          <span className="text-sm text-gray-500 ml-auto">
-            Showing {filtered.length} of {participants.length} participants
+          <span className="text-xs ml-auto" style={{ color: "var(--on-surface-muted)" }}>
+            {filtered.length} of {participants.length}
           </span>
         </div>
       </div>
 
       {/* Bulk Action Bar */}
       {selected.size > 0 && (
-        <div className="px-6 py-3 bg-red-50 border-b border-red-100 flex items-center gap-3 flex-wrap">
-          <span className="text-sm font-medium text-red-800">
+        <div className="px-6 py-3 flex items-center gap-3 flex-wrap" style={{ background: "rgba(147, 0, 10, 0.15)" }}>
+          <span className="text-sm font-medium" style={{ color: "var(--tertiary)" }}>
             {selected.size} selected
           </span>
-          <button
-            onClick={() => handleBulkAction("dropped")}
-            disabled={actionLoading}
-            className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-          >
-            {actionLoading ? "Processing..." : "Deactivate Selected"}
+          <button onClick={() => handleBulkAction("dropped")} disabled={actionLoading}
+            className="px-3 py-1.5 text-xs font-medium rounded-full transition-colors disabled:opacity-50"
+            style={{ background: "var(--tertiary-container)", color: "var(--tertiary)" }}>
+            {actionLoading ? "Processing..." : "Deactivate"}
           </button>
-          <button
-            onClick={() => handleBulkAction("active")}
-            disabled={actionLoading}
-            className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
-          >
-            Reactivate Selected
+          <button onClick={() => handleBulkAction("active")} disabled={actionLoading}
+            className="px-3 py-1.5 text-xs font-medium rounded-full transition-colors disabled:opacity-50"
+            style={{ background: "var(--success-container)", color: "var(--success)" }}>
+            Reactivate
           </button>
-          <button
-            onClick={() => setSelected(new Set())}
-            className="px-3 py-1.5 bg-white text-gray-600 text-xs font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
-          >
-            Clear Selection
-          </button>
+          <button onClick={() => setSelected(new Set())} className="ma-btn-secondary text-xs py-1 px-3">Clear</button>
           {actionResult && (
-            <span className={`text-xs font-medium ml-auto ${actionResult.type === "success" ? "text-green-600" : "text-red-600"}`}>
+            <span className={`text-xs font-medium ml-auto`} style={{ color: actionResult.type === "success" ? "var(--success)" : "var(--tertiary)" }}>
               {actionResult.message}
             </span>
           )}
@@ -215,32 +190,20 @@ export default function ParticipantSearch({
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100 text-left text-gray-500 font-medium">
-              <th className="px-4 py-3 w-10">
-                <input
-                  type="checkbox"
-                  checked={allFilteredSelected}
-                  onChange={toggleSelectAll}
-                  className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                />
+            <tr style={{ borderBottom: "1px solid rgba(70, 69, 84, 0.15)" }}>
+              <th className="px-4 py-3 w-10 text-left">
+                <input type="checkbox" checked={allFilteredSelected} onChange={toggleSelectAll}
+                  className="w-4 h-4 rounded accent-purple-500" />
               </th>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Track</th>
-              <th className="px-4 py-3">Tier</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Payment</th>
-              <th className="px-4 py-3">Weight Change</th>
-              <th className="px-4 py-3">Check-ins</th>
-              <th className="px-4 py-3">Last Check-in</th>
+              {["Name", "Track", "Tier", "Status", "Payment", "Weight", "Check-ins", "Last"].map((h) => (
+                <th key={h} className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: "var(--on-surface-muted)" }}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td
-                  colSpan={9}
-                  className="px-6 py-12 text-center text-gray-400"
-                >
+                <td colSpan={9} className="px-6 py-12 text-center text-sm" style={{ color: "var(--on-surface-muted)" }}>
                   No participants match your filters.
                 </td>
               </tr>
@@ -248,103 +211,61 @@ export default function ParticipantSearch({
               filtered.map((p, i) => (
                 <tr
                   key={p.id}
-                  className={`hover:bg-red-50 transition-colors ${
-                    selected.has(p.id) ? "bg-red-50/50" : i % 2 === 0 ? "bg-white" : "bg-gray-50/50"
-                  }`}
+                  className="transition-colors cursor-pointer"
+                  style={{
+                    background: selected.has(p.id) ? "rgba(128, 131, 255, 0.08)" : i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.02)",
+                    borderBottom: "1px solid rgba(70, 69, 84, 0.08)",
+                  }}
                 >
                   <td className="px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={selected.has(p.id)}
-                      onChange={() => toggleSelect(p.id)}
-                      className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                    />
+                    <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggleSelect(p.id)}
+                      className="w-4 h-4 rounded accent-purple-500" />
                   </td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/admin/participants/${p.id}`}
-                      className="text-gray-900 font-medium hover:text-red-600"
-                    >
+                    <Link href={`/admin/participants/${p.id}`} className="font-medium text-sm hover:underline" style={{ color: "var(--on-surface)" }}>
                       {p.name}
                     </Link>
-                    <p className="text-xs text-gray-400">{p.email}</p>
+                    <p className="text-xs" style={{ color: "var(--on-surface-muted)" }}>{p.email}</p>
                   </td>
                   <td className="px-4 py-3">
                     {p.track_name ? (
-                      <span
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium"
-                        style={{
-                          backgroundColor: p.track_color
-                            ? `${p.track_color}20`
-                            : "#f3f4f6",
-                          color: p.track_color ?? "#6b7280",
-                        }}
-                      >
-                        {p.track_icon && (
-                          <span className="mr-0.5">{p.track_icon}</span>
-                        )}
+                      <span className="ma-chip" style={{ backgroundColor: p.track_color ? `${p.track_color}20` : "var(--surface-bright)", color: p.track_color ?? "var(--on-surface-variant)" }}>
+                        {p.track_icon && <span>{p.track_icon}</span>}
                         {p.track_name}
                       </span>
                     ) : (
-                      <span className="text-gray-400">--</span>
+                      <span style={{ color: "var(--outline)" }}>--</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {p.tier_name ?? <span className="text-gray-400">--</span>}
+                  <td className="px-4 py-3 text-xs" style={{ color: "var(--on-surface-variant)" }}>
+                    {p.tier_name ?? <span style={{ color: "var(--outline)" }}>--</span>}
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        p.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : p.status === "dropped"
-                            ? "bg-red-100 text-red-700"
-                            : p.status === "inactive"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
+                    <span className="ma-badge" style={{
+                      background: p.status === "active" ? "rgba(125, 220, 142, 0.15)" : p.status === "dropped" ? "rgba(147, 0, 10, 0.2)" : "rgba(255, 212, 102, 0.15)",
+                      color: p.status === "active" ? "var(--success)" : p.status === "dropped" ? "var(--tertiary)" : "var(--warning)",
+                    }}>
                       {p.status}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        (p.payment_status ?? "unpaid") === "paid"
-                          ? "bg-green-100 text-green-700"
-                          : (p.payment_status ?? "unpaid") === "invoiced"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700"
-                      }`}
-                    >
+                    <span className="ma-badge" style={{
+                      background: (p.payment_status ?? "unpaid") === "paid" ? "rgba(125, 220, 142, 0.15)" : (p.payment_status ?? "unpaid") === "invoiced" ? "rgba(255, 212, 102, 0.15)" : "rgba(147, 0, 10, 0.2)",
+                      color: (p.payment_status ?? "unpaid") === "paid" ? "var(--success)" : (p.payment_status ?? "unpaid") === "invoiced" ? "var(--warning)" : "var(--tertiary)",
+                    }}>
                       {p.payment_status ?? "unpaid"}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    {p.weight_change != null ? (
-                      <span
-                        className={
-                          p.weight_change < 0
-                            ? "text-green-600 font-medium"
-                            : p.weight_change > 0
-                              ? "text-red-600 font-medium"
-                              : "text-gray-600"
-                        }
-                      >
-                        {p.weight_change > 0 ? "+" : ""}
-                        {p.weight_change} lbs
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">--</span>
-                    )}
+                  <td className="px-4 py-3 text-xs font-medium" style={{
+                    color: p.weight_change != null ? (p.weight_change < 0 ? "var(--success)" : p.weight_change > 0 ? "var(--tertiary)" : "var(--on-surface-muted)") : "var(--outline)",
+                  }}>
+                    {p.weight_change != null ? `${p.weight_change > 0 ? "+" : ""}${p.weight_change}` : "--"}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-xs" style={{ color: "var(--on-surface-variant)" }}>
                     {p.total_checkins}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {p.last_checkin_date ?? (
-                      <span className="text-gray-400">Never</span>
-                    )}
+                  <td className="px-4 py-3 text-xs" style={{ color: "var(--on-surface-muted)" }}>
+                    {p.last_checkin_date ?? "Never"}
                   </td>
                 </tr>
               ))

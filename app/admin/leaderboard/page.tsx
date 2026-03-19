@@ -37,14 +37,14 @@ export default async function AdminLeaderboard() {
   if (!challenge) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">Leaderboard</h1>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-          <p className="text-gray-400 mb-4">
+        <h1 className="font-display text-4xl font-bold mb-6" style={{ color: "var(--on-surface)" }}>Leaderboard</h1>
+        <div className="rounded-xl p-12 text-center" style={{ background: "var(--surface-container-high)" }}>
+          <p className="mb-4" style={{ color: "var(--on-surface-muted)" }}>
             No challenge found. Create a challenge first.
           </p>
           <Link
             href="/admin/challenges/new"
-            className="inline-block bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
+            className="ma-btn-primary inline-block px-5 py-2.5 rounded-lg font-medium transition-colors"
           >
             Create Challenge
           </Link>
@@ -69,9 +69,9 @@ export default async function AdminLeaderboard() {
   if (activeParticipants.length === 0) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">Leaderboard</h1>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-          <p className="text-gray-400">
+        <h1 className="font-display text-4xl font-bold mb-6" style={{ color: "var(--on-surface)" }}>Leaderboard</h1>
+        <div className="rounded-xl p-12 text-center" style={{ background: "var(--surface-container-high)" }}>
+          <p style={{ color: "var(--on-surface-muted)" }}>
             No active participants yet.
           </p>
         </div>
@@ -98,7 +98,7 @@ export default async function AdminLeaderboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-gray-900">Leaderboard</h1>
+      <h1 className="font-display text-4xl font-bold mb-6" style={{ color: "var(--on-surface)" }}>Leaderboard</h1>
       <LeaderboardView data={scored} />
     </div>
   );

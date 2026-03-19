@@ -48,16 +48,16 @@ export default function CommsHub({
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+      <div className="flex gap-1 rounded-lg p-1" style={{ background: "var(--surface-container-low)" }}>
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${
-              activeTab === tab.key
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
+            className={`flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-colors`}
+            style={activeTab === tab.key
+              ? { background: "var(--surface-container-high)", color: "var(--on-surface)" }
+              : { color: "var(--on-surface-muted)" }
+            }
           >
             {tab.label}
           </button>
@@ -122,18 +122,18 @@ function QuickSend({ participants }: { participants: Participant[] }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div className="px-6 py-4 border-b border-gray-100">
-        <h2 className="font-semibold text-gray-800">Send to Individual</h2>
-        <p className="text-sm text-gray-500 mt-1">Send a personal email to a specific participant.</p>
+    <div className="rounded-xl" style={{ background: "var(--surface-container-high)" }}>
+      <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(70, 69, 84, 0.15)" }}>
+        <h2 className="font-display font-semibold text-lg" style={{ color: "var(--on-surface)" }}>Send to Individual</h2>
+        <p className="text-sm mt-1" style={{ color: "var(--on-surface-muted)" }}>Send a personal email to a specific participant.</p>
       </div>
       <div className="p-6 space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Participant</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: "var(--on-surface-variant)" }}>Participant</label>
           <select
             value={selectedId}
             onChange={(e) => setSelectedId(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" style={{ background: "var(--surface-container-low)", color: "var(--on-surface)", border: "1px solid rgba(70, 69, 84, 0.3)" }}
           >
             <option value="">Select a participant...</option>
             {participants.map((p) => (
@@ -145,42 +145,42 @@ function QuickSend({ participants }: { participants: Participant[] }) {
         </div>
 
         {selected && (
-          <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
+          <div className="rounded-lg p-3 flex items-center gap-3" style={{ background: "var(--surface-container-low)" }}>
             <div>
-              <p className="font-medium text-gray-900 text-sm">{selected.name}</p>
-              <p className="text-xs text-gray-500">{selected.email} &middot; {selected.tracks?.name} &middot; {selected.tiers?.name}</p>
+              <p className="font-medium text-sm" style={{ color: "var(--on-surface)" }}>{selected.name}</p>
+              <p className="text-xs" style={{ color: "var(--on-surface-muted)" }}>{selected.email} &middot; {selected.tracks?.name} &middot; {selected.tiers?.name}</p>
             </div>
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: "var(--on-surface-variant)" }}>Subject</label>
           <input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="e.g. Quick check-in from Coach Jason"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" style={{ background: "var(--surface-container-low)", color: "var(--on-surface)", border: "1px solid rgba(70, 69, 84, 0.3)" }}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: "var(--on-surface-variant)" }}>Message</label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={6}
             placeholder="Hey {name}, just checking in on your progress..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-y"
+            className="w-full px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-y" style={{ background: "var(--surface-container-low)", color: "var(--on-surface)", border: "1px solid rgba(70, 69, 84, 0.3)" }}
           />
-          <p className="text-xs text-gray-400 mt-1">Placeholders: {"{name}"}, {"{track}"}, {"{tier}"}</p>
+          <p className="text-xs mt-1" style={{ color: "var(--on-surface-muted)" }}>Placeholders: {"{name}"}, {"{track}"}, {"{tier}"}</p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={handleSend}
             disabled={!selected || !subject.trim() || !body.trim() || sending}
-            className="px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="ma-btn-primary px-5 py-2.5 text-sm font-medium rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {sending ? "Sending..." : "Send Email"}
           </button>
@@ -267,15 +267,15 @@ function BroadcastComposer({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div className="px-6 py-4 border-b border-gray-100">
-        <h2 className="font-semibold text-gray-800">Broadcast Message</h2>
-        <p className="text-sm text-gray-500 mt-1">Send an email to multiple participants at once.</p>
+    <div className="rounded-xl" style={{ background: "var(--surface-container-high)" }}>
+      <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(70, 69, 84, 0.15)" }}>
+        <h2 className="font-display font-semibold text-lg" style={{ color: "var(--on-surface)" }}>Broadcast Message</h2>
+        <p className="text-sm mt-1" style={{ color: "var(--on-surface-muted)" }}>Send an email to multiple participants at once.</p>
       </div>
       <div className="p-6 space-y-5">
         {/* Audience */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Audience</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: "var(--on-surface-variant)" }}>Audience</label>
           <div className="flex gap-2 mb-3">
             {([
               { key: "all" as const, label: "All" },
@@ -285,11 +285,11 @@ function BroadcastComposer({
               <button
                 key={opt.key}
                 onClick={() => setAudienceMode(opt.key)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                  audienceMode === opt.key
-                    ? "bg-red-600 text-white border-red-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                }`}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={audienceMode === opt.key
+                  ? { background: "var(--primary)", color: "var(--on-primary)" }
+                  : { background: "var(--surface-container-low)", color: "var(--on-surface-variant)", border: "1px solid rgba(70, 69, 84, 0.3)" }
+                }
               >
                 {opt.label}
               </button>
@@ -298,7 +298,7 @@ function BroadcastComposer({
 
           {audienceMode === "track" && (
             <select value={selectedTrackId} onChange={(e) => setSelectedTrackId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500">
+              className="w-full px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" style={{ background: "var(--surface-container-low)", color: "var(--on-surface)", border: "1px solid rgba(70, 69, 84, 0.3)" }}>
               <option value="">Select a track...</option>
               {tracks.map((t) => (
                 <option key={t.id} value={t.id}>{t.icon ? `${t.icon} ` : ""}{t.name}</option>
@@ -308,7 +308,7 @@ function BroadcastComposer({
 
           {audienceMode === "tier" && (
             <select value={selectedTierId} onChange={(e) => setSelectedTierId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500">
+              className="w-full px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" style={{ background: "var(--surface-container-low)", color: "var(--on-surface)", border: "1px solid rgba(70, 69, 84, 0.3)" }}>
               <option value="">Select a tier...</option>
               {tiers.map((t) => (
                 <option key={t.id} value={t.id}>{t.name}</option>
@@ -316,30 +316,30 @@ function BroadcastComposer({
             </select>
           )}
 
-          <p className="mt-2 text-sm text-gray-500">
-            {audienceLabel} &middot; <span className="font-medium text-gray-700">{recipients.length}</span> recipient{recipients.length !== 1 ? "s" : ""}
+          <p className="mt-2 text-sm" style={{ color: "var(--on-surface-muted)" }}>
+            {audienceLabel} &middot; <span className="font-medium" style={{ color: "var(--on-surface-variant)" }}>{recipients.length}</span> recipient{recipients.length !== 1 ? "s" : ""}
           </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: "var(--on-surface-variant)" }}>Subject</label>
           <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)}
             placeholder="e.g. Week 3 Update: Keep the momentum going!"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" />
+            className="w-full px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" style={{ background: "var(--surface-container-low)", color: "var(--on-surface)", border: "1px solid rgba(70, 69, 84, 0.3)" }} />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: "var(--on-surface-variant)" }}>Message</label>
           <textarea value={body} onChange={(e) => setBody(e.target.value)}
             rows={8} placeholder="Write your message here..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-y" />
+            className="w-full px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-y" style={{ background: "var(--surface-container-low)", color: "var(--on-surface)", border: "1px solid rgba(70, 69, 84, 0.3)" }} />
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={handleSend}
             disabled={recipients.length === 0 || !subject.trim() || !body.trim() || sending}
-            className="px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="ma-btn-primary px-5 py-2.5 text-sm font-medium rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {sending ? "Sending..." : `Send to ${recipients.length} Recipient${recipients.length !== 1 ? "s" : ""}`}
           </button>
@@ -381,22 +381,22 @@ function WelcomeEmails({ participants }: { participants: Participant[]; challeng
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div className="px-6 py-4 border-b border-gray-100">
-        <h2 className="font-semibold text-gray-800">Welcome Emails</h2>
-        <p className="text-sm text-gray-500 mt-1">
+    <div className="rounded-xl" style={{ background: "var(--surface-container-high)" }}>
+      <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(70, 69, 84, 0.15)" }}>
+        <h2 className="font-display font-semibold text-lg" style={{ color: "var(--on-surface)" }}>Welcome Emails</h2>
+        <p className="text-sm mt-1" style={{ color: "var(--on-surface-muted)" }}>
           Resend welcome emails to participants who may not have received theirs. Each email includes their dashboard link, track/tier info, and getting started steps.
         </p>
       </div>
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y" style={{ borderColor: "rgba(70, 69, 84, 0.15)" }}>
         {participants.length === 0 ? (
-          <div className="px-6 py-12 text-center text-gray-400">No active participants yet.</div>
+          <div className="px-6 py-12 text-center" style={{ color: "var(--on-surface-muted)" }}>No active participants yet.</div>
         ) : (
           participants.map((p) => (
             <div key={p.id} className="px-6 py-3 flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900 text-sm">{p.name}</p>
-                <p className="text-xs text-gray-500">{p.email} &middot; {p.tracks?.name ?? "—"} &middot; {p.tiers?.name ?? "—"}</p>
+                <p className="font-medium text-sm" style={{ color: "var(--on-surface)" }}>{p.name}</p>
+                <p className="text-xs" style={{ color: "var(--on-surface-muted)" }}>{p.email} &middot; {p.tracks?.name ?? "—"} &middot; {p.tiers?.name ?? "—"}</p>
               </div>
               <div className="flex items-center gap-2">
                 {results[p.id] === "sent" && (
@@ -408,7 +408,8 @@ function WelcomeEmails({ participants }: { participants: Participant[]; challeng
                 <button
                   onClick={() => resendWelcome(p)}
                   disabled={sendingTo === p.id}
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg disabled:opacity-50 transition-colors"
+                  style={{ background: "var(--surface-container-low)", color: "var(--on-surface-variant)" }}
                 >
                   {sendingTo === p.id ? "Sending..." : "Send Welcome Email"}
                 </button>

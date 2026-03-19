@@ -139,54 +139,54 @@ export default async function Participants() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Participants</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="font-display text-4xl font-bold" style={{ color: "var(--on-surface)" }}>Participants</h1>
         <ExportButton />
       </div>
 
       {/* Tier Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-800">The Plan</h3>
-            <span className="text-2xl font-bold text-gray-900">{tierCounts["The Plan"] ?? 0}</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div className="ma-card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display font-semibold" style={{ color: "var(--on-surface-variant)" }}>The Plan</h3>
+            <span className="font-display text-2xl font-bold" style={{ color: "var(--on-surface)" }}>{tierCounts["The Plan"] ?? 0}</span>
           </div>
-          <ul className="space-y-1 text-xs text-gray-500">
-            <li className="flex items-start gap-1.5"><span className="text-green-500">&#10003;</span> AI nutrition + training plan</li>
-            <li className="flex items-start gap-1.5"><span className="text-green-500">&#10003;</span> Daily check-ins + leaderboard</li>
-            <li className="flex items-start gap-1.5"><span className="text-green-500">&#10003;</span> Murph prep guide (template)</li>
-            <li className="flex items-start gap-1.5"><span className="text-gray-300">&#10005;</span> <span className="text-gray-400">No coaching feedback</span></li>
-            <li className="flex items-start gap-1.5"><span className="text-gray-300">&#10005;</span> <span className="text-gray-400">No meal plan or workout mods</span></li>
+          <ul className="space-y-1.5 text-xs" style={{ color: "var(--on-surface-muted)" }}>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--success)" }}>&#10003;</span> AI nutrition + training plan</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--success)" }}>&#10003;</span> Daily check-ins + leaderboard</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--success)" }}>&#10003;</span> Murph prep guide (template)</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--outline)" }}>&#10005;</span> <span style={{ color: "var(--outline)" }}>No coaching feedback</span></li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--outline)" }}>&#10005;</span> <span style={{ color: "var(--outline)" }}>No meal plan or workout mods</span></li>
           </ul>
         </div>
 
-        <div className="bg-white rounded-xl border border-blue-200 shadow-sm p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-blue-800">The Accelerator</h3>
-            <span className="text-2xl font-bold text-blue-700">{tierCounts["The Accelerator"] ?? 0}</span>
+        <div className="p-6" style={{ background: "var(--surface-container-high)", borderRadius: "var(--radius-lg)", borderLeft: "3px solid var(--primary-container)" }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display font-semibold" style={{ color: "var(--primary)" }}>The Accelerator</h3>
+            <span className="font-display text-2xl font-bold" style={{ color: "var(--primary)" }}>{tierCounts["The Accelerator"] ?? 0}</span>
           </div>
-          <ul className="space-y-1 text-xs text-gray-500">
-            <li className="flex items-start gap-1.5"><span className="text-green-500">&#10003;</span> Everything in The Plan</li>
-            <li className="flex items-start gap-1.5"><span className="text-blue-500">&#10003;</span> Weekly AI performance analysis</li>
-            <li className="flex items-start gap-1.5"><span className="text-blue-500">&#10003;</span> Custom workout modifications</li>
-            <li className="flex items-start gap-1.5"><span className="text-blue-500">&#10003;</span> Mid-program macro adjustment</li>
-            <li className="flex items-start gap-1.5"><span className="text-blue-500">&#10003;</span> AI coaching on check-ins</li>
-            <li className="flex items-start gap-1.5"><span className="text-blue-500">&#10003;</span> Meal substitutions + supplements</li>
+          <ul className="space-y-1.5 text-xs" style={{ color: "var(--on-surface-muted)" }}>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--success)" }}>&#10003;</span> Everything in The Plan</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--primary-container)" }}>&#10003;</span> Weekly AI performance analysis</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--primary-container)" }}>&#10003;</span> Custom workout modifications</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--primary-container)" }}>&#10003;</span> Mid-program macro adjustment</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--primary-container)" }}>&#10003;</span> AI coaching on check-ins</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--primary-container)" }}>&#10003;</span> Meal substitutions + supplements</li>
           </ul>
         </div>
 
-        <div className="bg-white rounded-xl border border-purple-200 shadow-sm p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-purple-800">The Elite</h3>
-            <span className="text-2xl font-bold text-purple-700">{tierCounts["The Elite"] ?? 0}</span>
+        <div className="p-6" style={{ background: "var(--surface-container-high)", borderRadius: "var(--radius-lg)", borderLeft: "3px solid var(--secondary)" }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display font-semibold" style={{ color: "var(--secondary)" }}>The Elite</h3>
+            <span className="font-display text-2xl font-bold" style={{ color: "var(--secondary)" }}>{tierCounts["The Elite"] ?? 0}</span>
           </div>
-          <ul className="space-y-1 text-xs text-gray-500">
-            <li className="flex items-start gap-1.5"><span className="text-green-500">&#10003;</span> Everything in Accelerator</li>
-            <li className="flex items-start gap-1.5"><span className="text-purple-500">&#10003;</span> Custom 7-day meal plan</li>
-            <li className="flex items-start gap-1.5"><span className="text-purple-500">&#10003;</span> Daily AI coaching feedback</li>
-            <li className="flex items-start gap-1.5"><span className="text-purple-500">&#10003;</span> Meal photo analysis</li>
-            <li className="flex items-start gap-1.5"><span className="text-purple-500">&#10003;</span> Supplement recommendations</li>
-            <li className="flex items-start gap-1.5"><span className="text-purple-500">&#10003;</span> Post-program transition plan</li>
+          <ul className="space-y-1.5 text-xs" style={{ color: "var(--on-surface-muted)" }}>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--success)" }}>&#10003;</span> Everything in Accelerator</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--secondary)" }}>&#10003;</span> Custom 7-day meal plan</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--secondary)" }}>&#10003;</span> Daily AI coaching feedback</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--secondary)" }}>&#10003;</span> Meal photo analysis</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--secondary)" }}>&#10003;</span> Supplement recommendations</li>
+            <li className="flex items-start gap-1.5"><span style={{ color: "var(--secondary)" }}>&#10003;</span> Post-program transition plan</li>
           </ul>
         </div>
       </div>

@@ -49,14 +49,14 @@ export default async function Marketing() {
   if (!challenge) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Marketing Hub</h1>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-          <p className="text-gray-400 mb-4">
+        <h1 className="font-display text-4xl font-bold" style={{ color: "var(--on-surface)" }}>Marketing Hub</h1>
+        <div className="rounded-xl p-12 text-center" style={{ background: "var(--surface-container-high)" }}>
+          <p className="mb-4" style={{ color: "var(--on-surface-muted)" }}>
             No challenges found. Create a challenge first to generate marketing content.
           </p>
           <Link
             href="/admin/challenges/new"
-            className="inline-block bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
+            className="ma-btn-primary inline-block px-5 py-2.5 rounded-lg font-medium transition-colors"
           >
             Create Challenge
           </Link>
@@ -81,10 +81,10 @@ export default async function Marketing() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Marketing Hub</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="font-display text-4xl font-bold" style={{ color: "var(--on-surface)" }}>Marketing Hub</h1>
+          <p className="mt-1" style={{ color: "var(--on-surface-muted)" }}>
             Auto-generated Instagram posts for{" "}
-            <span className="font-medium text-gray-700">{typedChallenge.name}</span>
+            <span className="font-medium" style={{ color: "var(--on-surface-variant)" }}>{typedChallenge.name}</span>
           </p>
         </div>
         <Link

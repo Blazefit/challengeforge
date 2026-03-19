@@ -238,16 +238,16 @@ const phaseLabels: Record<PostData["phase"], string> = {
   post: "Post-Challenge",
 };
 
-const phaseColors: Record<PostData["phase"], string> = {
-  "pre-launch": "bg-blue-100 text-blue-700",
-  during: "bg-green-100 text-green-700",
-  post: "bg-purple-100 text-purple-700",
+const phaseStyles: Record<PostData["phase"], React.CSSProperties> = {
+  "pre-launch": { background: "rgba(96, 165, 250, 0.15)", color: "#60a5fa" },
+  during: { background: "rgba(76, 175, 80, 0.15)", color: "var(--success)" },
+  post: { background: "rgba(192, 132, 252, 0.15)", color: "#c084fc" },
 };
 
-const statusColors: Record<PostStatus, string> = {
-  draft: "bg-gray-100 text-gray-600",
-  scheduled: "bg-yellow-100 text-yellow-700",
-  posted: "bg-green-100 text-green-700",
+const statusStyles: Record<PostStatus, React.CSSProperties> = {
+  draft: { background: "rgba(70, 69, 84, 0.15)", color: "var(--on-surface-muted)" },
+  scheduled: { background: "rgba(255, 193, 7, 0.15)", color: "var(--warning)" },
+  posted: { background: "rgba(76, 175, 80, 0.15)", color: "var(--success)" },
 };
 
 const statusOrder: PostStatus[] = ["draft", "scheduled", "posted"];
@@ -276,11 +276,11 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   return (
     <button
       onClick={handleCopy}
-      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-        copied
-          ? "bg-green-100 text-green-700"
-          : "bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600"
-      }`}
+      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+      style={copied
+        ? { background: "rgba(76, 175, 80, 0.15)", color: "var(--success)" }
+        : { background: "var(--surface-container-low)", color: "var(--on-surface-muted)" }
+      }
     >
       {copied ? "Copied!" : `Copy ${label}`}
     </button>
@@ -303,7 +303,8 @@ function StatusToggle({
   return (
     <button
       onClick={cycle}
-      className={`px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors ${statusColors[status]}`}
+      className="px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors"
+      style={statusStyles[status]}
       title="Click to cycle status"
     >
       {status}
@@ -374,34 +375,34 @@ export default function MarketingPosts({
   return (
     <div>
       {/* Stats Bar */}
-      {saving && <p className="text-xs text-gray-400 mb-2 text-right">Saving...</p>}
+      {saving && <p className="text-xs mb-2 text-right" style={{ color: "var(--on-surface-muted)" }}>Saving...</p>}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4">
-          <p className="text-sm text-gray-500">Drafts</p>
-          <p className="text-2xl font-bold text-gray-900">{counts.draft}</p>
+        <div className="rounded-xl px-5 py-4" style={{ background: "var(--surface-container-high)" }}>
+          <p className="text-sm" style={{ color: "var(--on-surface-muted)" }}>Drafts</p>
+          <p className="text-2xl font-bold" style={{ color: "var(--on-surface)" }}>{counts.draft}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4">
-          <p className="text-sm text-gray-500">Scheduled</p>
-          <p className="text-2xl font-bold text-yellow-600">{counts.scheduled}</p>
+        <div className="rounded-xl px-5 py-4" style={{ background: "var(--surface-container-high)" }}>
+          <p className="text-sm" style={{ color: "var(--on-surface-muted)" }}>Scheduled</p>
+          <p className="text-2xl font-bold" style={{ color: "var(--warning)" }}>{counts.scheduled}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4">
-          <p className="text-sm text-gray-500">Posted</p>
-          <p className="text-2xl font-bold text-green-600">{counts.posted}</p>
+        <div className="rounded-xl px-5 py-4" style={{ background: "var(--surface-container-high)" }}>
+          <p className="text-sm" style={{ color: "var(--on-surface-muted)" }}>Posted</p>
+          <p className="text-2xl font-bold" style={{ color: "var(--success)" }}>{counts.posted}</p>
         </div>
       </div>
 
       {/* Phase Filter */}
       <div className="flex items-center gap-2 mb-6">
-        <span className="text-sm text-gray-500 mr-1">Filter:</span>
+        <span className="text-sm mr-1" style={{ color: "var(--on-surface-muted)" }}>Filter:</span>
         {(["all", "pre-launch", "during", "post"] as const).map((phase) => (
           <button
             key={phase}
             onClick={() => setFilterPhase(phase)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filterPhase === phase
-                ? "bg-red-600 text-white"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
+            className="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
+            style={filterPhase === phase
+              ? { background: "var(--primary)", color: "var(--on-primary)" }
+              : { background: "var(--surface-container-high)", color: "var(--on-surface-muted)" }
+            }
           >
             {phase === "all"
               ? `All (${posts.length})`
@@ -415,24 +416,25 @@ export default function MarketingPosts({
         {filtered.map((post) => (
           <div
             key={post.number}
-            className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+            className="rounded-xl overflow-hidden" style={{ background: "var(--surface-container-high)" }}
           >
             {/* Card Header */}
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(70, 69, 84, 0.15)" }}>
               <div className="flex items-center gap-3">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-600 text-white text-sm font-bold">
+                <span className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold" style={{ background: "var(--primary)", color: "var(--on-primary)" }}>
                   {post.number}
                 </span>
                 <div>
-                  <h3 className="font-semibold text-gray-900">{post.title}</h3>
-                  <p className="text-xs text-gray-500">
+                  <h3 className="font-display font-semibold" style={{ color: "var(--on-surface)" }}>{post.title}</h3>
+                  <p className="text-xs" style={{ color: "var(--on-surface-muted)" }}>
                     Suggested: {formatDate(post.suggestedDate)}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <span
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${phaseColors[post.phase]}`}
+                  className="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  style={phaseStyles[post.phase]}
                 >
                   {phaseLabels[post.phase]}
                 </span>
@@ -448,12 +450,12 @@ export default function MarketingPosts({
               {/* Caption */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--on-surface-muted)" }}>
                     Caption
                   </h4>
                   <CopyButton text={post.caption} label="Caption" />
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <p className="text-sm leading-relaxed whitespace-pre-wrap rounded-lg p-4" style={{ background: "var(--surface-container-low)", color: "var(--on-surface-variant)" }}>
                   {post.caption}
                 </p>
               </div>
@@ -461,12 +463,12 @@ export default function MarketingPosts({
               {/* Hashtags */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--on-surface-muted)" }}>
                     Hashtags
                   </h4>
                   <CopyButton text={post.hashtags} label="Hashtags" />
                 </div>
-                <p className="text-sm text-red-600 bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <p className="text-sm rounded-lg p-4" style={{ background: "var(--surface-container-low)", color: "var(--primary)" }}>
                   {post.hashtags}
                 </p>
               </div>
@@ -474,12 +476,12 @@ export default function MarketingPosts({
               {/* Image Prompt */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--on-surface-muted)" }}>
                     AI Image Prompt
                   </h4>
                   <CopyButton text={post.imagePrompt} label="Prompt" />
                 </div>
-                <p className="text-sm text-gray-600 italic bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <p className="text-sm italic rounded-lg p-4" style={{ background: "var(--surface-container-low)", color: "var(--on-surface-muted)" }}>
                   {post.imagePrompt}
                 </p>
               </div>

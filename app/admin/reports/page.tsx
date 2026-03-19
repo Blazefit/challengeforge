@@ -39,16 +39,16 @@ export default async function WeeklyReport({
   if (!challenge) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">
+        <h1 className="font-display text-4xl font-bold mb-6" style={{ color: "var(--on-surface)" }}>
           Weekly Report
         </h1>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-          <p className="text-gray-400 mb-4">
+        <div className="rounded-xl p-12 text-center" style={{ background: "var(--surface-container-high)" }}>
+          <p className="mb-4" style={{ color: "var(--on-surface-muted)" }}>
             No challenge found. Create a challenge first.
           </p>
           <Link
             href="/admin/challenges/new"
-            className="inline-block bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
+            className="ma-btn-primary inline-block px-5 py-2.5 rounded-lg font-medium transition-colors"
           >
             Create Challenge
           </Link>
@@ -302,19 +302,19 @@ export default async function WeeklyReport({
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Weekly Report</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="font-display text-4xl font-bold" style={{ color: "var(--on-surface)" }}>Weekly Report</h1>
+          <p className="mt-1" style={{ color: "var(--on-surface-muted)" }}>
             {challenge.name} &middot; Week {weekNum} of {totalWeeks}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <p className="text-sm text-gray-500 mr-2">
+          <p className="text-sm mr-2" style={{ color: "var(--on-surface-muted)" }}>
             {weekStart} &mdash; {weekEnd}
           </p>
           {weekNum > 1 && (
             <Link
               href={`/admin/reports?week=${weekNum - 1}`}
-              className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors" style={{ background: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}
             >
               &larr; Prev
             </Link>
@@ -322,7 +322,7 @@ export default async function WeeklyReport({
           {weekNum < currentWeekNum && (
             <Link
               href={`/admin/reports?week=${weekNum + 1}`}
-              className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors" style={{ background: "var(--surface-container-high)", color: "var(--on-surface-variant)" }}
             >
               Next &rarr;
             </Link>
@@ -330,7 +330,7 @@ export default async function WeeklyReport({
           {weekNum !== currentWeekNum && (
             <Link
               href="/admin/reports"
-              className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors"
+              className="ma-btn-primary px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
             >
               Current Week
             </Link>
@@ -340,34 +340,34 @@ export default async function WeeklyReport({
 
       {/* Weekly Overview */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-          <p className="text-sm text-gray-500 mb-1">Total Check-ins</p>
-          <p className="text-3xl font-bold text-gray-900">{totalCheckins}</p>
-          <p className="text-xs text-gray-400 mt-1">
+        <div className="rounded-xl p-5" style={{ background: "var(--surface-container-high)" }}>
+          <p className="text-sm mb-1" style={{ color: "var(--on-surface-muted)" }}>Total Check-ins</p>
+          <p className="text-3xl font-bold" style={{ color: "var(--on-surface)" }}>{totalCheckins}</p>
+          <p className="text-xs mt-1" style={{ color: "var(--on-surface-muted)" }}>
             {uniqueCheckedIn.size} unique participants
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-          <p className="text-sm text-gray-500 mb-1">Avg Consistency</p>
-          <p className="text-3xl font-bold text-red-600">{avgConsistency}%</p>
-          <p className="text-xs text-gray-400 mt-1">
+        <div className="rounded-xl p-5" style={{ background: "var(--surface-container-high)" }}>
+          <p className="text-sm mb-1" style={{ color: "var(--on-surface-muted)" }}>Avg Consistency</p>
+          <p className="text-3xl font-bold" style={{ color: "var(--primary)" }}>{avgConsistency}%</p>
+          <p className="text-xs mt-1" style={{ color: "var(--on-surface-muted)" }}>
             daily check-in rate
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-          <p className="text-sm text-gray-500 mb-1">Avg Weight Change</p>
-          <p className="text-3xl font-bold text-gray-900">
+        <div className="rounded-xl p-5" style={{ background: "var(--surface-container-high)" }}>
+          <p className="text-sm mb-1" style={{ color: "var(--on-surface-muted)" }}>Avg Weight Change</p>
+          <p className="text-3xl font-bold" style={{ color: "var(--on-surface)" }}>
             {avgWeightChange > 0 ? "+" : ""}
             {avgWeightChange.toFixed(1)} lbs
           </p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs mt-1" style={{ color: "var(--on-surface-muted)" }}>
             across {weightChanges.length} participants
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-          <p className="text-sm text-gray-500 mb-1">Protein Adherence</p>
-          <p className="text-3xl font-bold text-red-600">{proteinPct}%</p>
-          <p className="text-xs text-gray-400 mt-1">
+        <div className="rounded-xl p-5" style={{ background: "var(--surface-container-high)" }}>
+          <p className="text-sm mb-1" style={{ color: "var(--on-surface-muted)" }}>Protein Adherence</p>
+          <p className="text-3xl font-bold" style={{ color: "var(--primary)" }}>{proteinPct}%</p>
+          <p className="text-xs mt-1" style={{ color: "var(--on-surface-muted)" }}>
             {proteinYes}/{proteinCheckins.length} check-ins hit target
           </p>
         </div>
@@ -375,21 +375,21 @@ export default async function WeeklyReport({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Top Performers */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-800">
+        <div className="rounded-xl" style={{ background: "var(--surface-container-high)" }}>
+          <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(70, 69, 84, 0.15)" }}>
+            <h2 className="font-display font-semibold text-lg" style={{ color: "var(--on-surface)" }}>
               Top Performers
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs mt-0.5" style={{ color: "var(--on-surface-muted)" }}>
               Most consistent this week
             </p>
           </div>
           {topPerformers.length === 0 ? (
             <div className="px-6 py-8 text-center">
-              <p className="text-gray-400">No check-ins this week yet.</p>
+              <p style={{ color: "var(--on-surface-muted)" }}>No check-ins this week yet.</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y" style={{ borderColor: "rgba(70, 69, 84, 0.08)" }}>
               {topPerformers.map((p, i) => (
                 <div
                   key={p.name}
@@ -397,16 +397,16 @@ export default async function WeeklyReport({
                 >
                   <div className="flex items-center gap-3">
                     <span
-                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                        i === 0
-                          ? "bg-red-100 text-red-700"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                      style={i === 0
+                        ? { background: "rgba(239, 68, 68, 0.15)", color: "var(--tertiary)" }
+                        : { background: "var(--surface-container-low)", color: "var(--on-surface-muted)" }
+                      }
                     >
                       {i + 1}
                     </span>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium" style={{ color: "var(--on-surface)" }}>
                         {p.name}
                       </p>
                       {p.track && (
@@ -423,10 +423,10 @@ export default async function WeeklyReport({
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-gray-900">
+                    <p className="text-sm font-bold" style={{ color: "var(--on-surface)" }}>
                       {p.consistency}%
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs" style={{ color: "var(--on-surface-muted)" }}>
                       {p.checkins}/{daysElapsed} days
                     </p>
                   </div>
@@ -437,34 +437,34 @@ export default async function WeeklyReport({
         </div>
 
         {/* Needs Attention */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-800">
+        <div className="rounded-xl" style={{ background: "var(--surface-container-high)" }}>
+          <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(70, 69, 84, 0.15)" }}>
+            <h2 className="font-display font-semibold text-lg" style={{ color: "var(--on-surface)" }}>
               Needs Attention
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs mt-0.5" style={{ color: "var(--on-surface-muted)" }}>
               0-1 check-ins this week
             </p>
           </div>
           {needsAttention.length === 0 ? (
             <div className="px-6 py-8 text-center">
-              <p className="text-green-600 font-medium">
+              <p className="font-medium" style={{ color: "var(--success)" }}>
                 Everyone is staying active!
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y" style={{ borderColor: "rgba(70, 69, 84, 0.08)" }}>
               {needsAttention.map((p) => (
                 <div
                   key={p.name}
                   className="px-6 py-3 flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-red-100 text-red-700">
+                    <span className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: "rgba(239, 68, 68, 0.15)", color: "var(--tertiary)" }}>
                       !
                     </span>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium" style={{ color: "var(--on-surface)" }}>
                         {p.name}
                       </p>
                       {p.track && (
@@ -480,7 +480,7 @@ export default async function WeeklyReport({
                       )}
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm" style={{ color: "var(--on-surface-muted)" }}>
                     {p.checkins === 0
                       ? "No check-ins"
                       : "1 check-in"}
@@ -493,18 +493,18 @@ export default async function WeeklyReport({
       </div>
 
       {/* Weight Movers */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-800">
+      <div className="rounded-xl" style={{ background: "var(--surface-container-high)" }}>
+        <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(70, 69, 84, 0.15)" }}>
+          <h2 className="font-display font-semibold text-lg" style={{ color: "var(--on-surface)" }}>
             Weight Movers
           </h2>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs mt-0.5" style={{ color: "var(--on-surface-muted)" }}>
             Biggest weight changes in the right direction this week
           </p>
         </div>
         {topWeightMovers.length === 0 ? (
           <div className="px-6 py-8 text-center">
-            <p className="text-gray-400">
+            <p style={{ color: "var(--on-surface-muted)" }}>
               Not enough weight data this week to show movers.
             </p>
           </div>
@@ -513,12 +513,12 @@ export default async function WeeklyReport({
             {topWeightMovers.map((m, i) => (
               <div
                 key={m.name}
-                className="border border-gray-100 rounded-lg p-4 text-center"
+                className="rounded-lg p-4 text-center" style={{ background: "var(--surface-container-low)" }}
               >
-                <p className="text-xs text-gray-400 mb-1">
+                <p className="text-xs mb-1" style={{ color: "var(--on-surface-muted)" }}>
                   #{i + 1} {m.direction === "gain" ? "Gainer" : "Loser"}
                 </p>
-                <p className="text-lg font-bold text-gray-900">{m.name}</p>
+                <p className="text-lg font-bold" style={{ color: "var(--on-surface)" }}>{m.name}</p>
                 {m.track && (
                   <span
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium mt-1"
@@ -530,7 +530,7 @@ export default async function WeeklyReport({
                     {m.track.icon} {m.track.name}
                   </span>
                 )}
-                <p className="text-2xl font-bold text-red-600 mt-2">
+                <p className="text-2xl font-bold mt-2" style={{ color: "var(--primary)" }}>
                   {m.change > 0 ? "+" : ""}
                   {m.change.toFixed(1)} lbs
                 </p>
