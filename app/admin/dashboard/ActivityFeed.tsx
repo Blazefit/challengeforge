@@ -19,34 +19,11 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
-function ActivityIcon({ type }: { type: ActivityItem["type"] }) {
-  switch (type) {
-    case "checkin":
-      return (
-        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-          <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-      );
-    case "signup":
-      return (
-        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-          <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-        </div>
-      );
-    case "plan":
-      return (
-        <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-          <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 01-1.59.659H9.06a2.25 2.25 0 01-1.59-.659L5 14.5m14 0V17a2.25 2.25 0 01-2.25 2.25H7.25A2.25 2.25 0 015 17v-2.5" />
-          </svg>
-        </div>
-      );
-  }
-}
+const typeConfig: Record<string, { icon: string; bg: string }> = {
+  checkin: { icon: "\u2713", bg: "rgba(125, 220, 142, 0.2)" },
+  signup: { icon: "+", bg: "rgba(128, 131, 255, 0.2)" },
+  plan: { icon: "\u2699", bg: "rgba(221, 183, 255, 0.2)" },
+};
 
 export default function ActivityFeed({ initialItems }: { initialItems: ActivityItem[] }) {
   const [items, setItems] = useState<ActivityItem[]>(initialItems);
@@ -64,9 +41,7 @@ export default function ActivityFeed({ initialItems }: { initialItems: ActivityI
         const freshIds = new Set<string>();
         for (const item of data) {
           const key = `${item.type}-${item.name}-${item.time}`;
-          if (!oldTimes.has(key)) {
-            freshIds.add(key);
-          }
+          if (!oldTimes.has(key)) freshIds.add(key);
         }
         if (freshIds.size > 0) {
           setNewItemIds(freshIds);
@@ -76,7 +51,7 @@ export default function ActivityFeed({ initialItems }: { initialItems: ActivityI
 
       setItems(data);
     } catch {
-      // Silently fail on fetch errors
+      // Silently fail
     } finally {
       if (isInitial) setLoading(false);
     }
@@ -92,13 +67,13 @@ export default function ActivityFeed({ initialItems }: { initialItems: ActivityI
   }, [fetchActivity]);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm mt-8">
-      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h2 className="font-semibold text-gray-800">Recent Activity</h2>
-        <span className="flex items-center gap-1.5 text-xs text-gray-400">
+    <div className="mt-8" style={{ background: "var(--surface-container-high)", borderRadius: "var(--radius-lg)" }}>
+      <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(70, 69, 84, 0.15)" }}>
+        <h2 className="font-display font-semibold text-lg" style={{ color: "var(--on-surface)" }}>Recent Activity</h2>
+        <span className="flex items-center gap-1.5 text-xs" style={{ color: "var(--on-surface-muted)" }}>
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "var(--success)" }}></span>
+            <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: "var(--success)" }}></span>
           </span>
           Live
         </span>
@@ -106,45 +81,53 @@ export default function ActivityFeed({ initialItems }: { initialItems: ActivityI
 
       {loading ? (
         <div className="px-6 py-12 text-center">
-          <p className="text-gray-400 text-sm">Loading activity...</p>
+          <p className="text-sm" style={{ color: "var(--on-surface-muted)" }}>Loading activity...</p>
         </div>
       ) : items.length === 0 ? (
         <div className="px-6 py-12 text-center">
-          <p className="text-gray-400 text-sm">No recent activity</p>
+          <p className="text-sm" style={{ color: "var(--on-surface-muted)" }}>No recent activity</p>
         </div>
       ) : (
-        <div className="divide-y divide-gray-50">
+        <div>
           {items.map((item) => {
             const key = `${item.type}-${item.name}-${item.time}`;
             const isNew = newItemIds.has(key);
+            const config = typeConfig[item.type] ?? typeConfig.checkin;
             return (
               <div
                 key={key}
-                className={`px-6 py-3 flex items-center gap-3 transition-colors ${
-                  isNew ? "animate-pulse bg-green-50" : ""
-                }`}
+                className="px-6 py-3 flex items-center gap-3 transition-colors"
+                style={{
+                  borderBottom: "1px solid rgba(70, 69, 84, 0.08)",
+                  background: isNew ? "rgba(125, 220, 142, 0.05)" : "transparent",
+                }}
               >
-                <ActivityIcon type={item.type} />
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                  style={{ background: config.bg, color: "var(--on-surface)" }}
+                >
+                  {config.icon}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm" style={{ color: "var(--on-surface)" }}>
                     <span className="font-medium">{item.name}</span>
                     {item.track && (
                       <span
-                        className="ml-1.5 inline-block px-1.5 py-0.5 rounded text-[10px] font-medium text-white"
-                        style={{ backgroundColor: item.trackColor ?? "#6b7280" }}
+                        className="ml-1.5 inline-block px-1.5 py-0.5 rounded text-[10px] font-medium"
+                        style={{ backgroundColor: item.trackColor ? `${item.trackColor}30` : "var(--surface-bright)", color: item.trackColor ?? "var(--on-surface-variant)" }}
                       >
                         {item.track}
                       </span>
                     )}
-                    <span className="text-gray-500 ml-1">
+                    <span className="ml-1" style={{ color: "var(--on-surface-muted)" }}>
                       {item.type === "checkin" && "checked in"}
                       {item.type === "signup" && "signed up"}
                       {item.type === "plan" && "got a nutrition plan"}
                     </span>
                   </p>
-                  <p className="text-xs text-gray-400">{item.detail}</p>
+                  <p className="text-xs" style={{ color: "var(--on-surface-muted)" }}>{item.detail}</p>
                 </div>
-                <span className="text-xs text-gray-400 flex-shrink-0">{timeAgo(item.time)}</span>
+                <span className="text-xs flex-shrink-0" style={{ color: "var(--on-surface-muted)" }}>{timeAgo(item.time)}</span>
               </div>
             );
           })}

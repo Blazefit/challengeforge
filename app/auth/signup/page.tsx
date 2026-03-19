@@ -102,17 +102,17 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--surface)" }}>
+      <div className="max-w-md w-full p-8" style={{ background: "var(--surface-container-high)", borderRadius: "var(--radius-xl)" }}>
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-red-600 mb-2">ChallengeForge</h1>
-          <p className="text-gray-500">
+          <h1 className="font-display text-3xl font-bold mb-2" style={{ background: "var(--brand-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>ChallengeForge</h1>
+          <p style={{ color: "var(--on-surface-muted)" }}>
             {isLogin ? "Welcome back" : "Create your gym account"}
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm mb-6">
+          <div className="px-4 py-3 rounded-lg text-sm mb-6" style={{ background: "rgba(147, 0, 10, 0.2)", color: "var(--tertiary)" }}>
             {error}
           </div>
         )}
@@ -121,7 +121,8 @@ export default function AuthPage() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-3 py-2.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          style={{ background: "var(--surface-container-highest)", color: "var(--on-surface)", borderRadius: "var(--radius-md)" }}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -134,17 +135,17 @@ export default function AuthPage() {
 
         <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200" />
+            <div className="w-full" style={{ borderTop: "1px solid rgba(70, 69, 84, 0.3)" }} />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-4 text-gray-400">or</span>
+            <span className="px-4" style={{ background: "var(--surface-container-high)", color: "var(--on-surface-muted)" }}>or</span>
           </div>
         </div>
 
         <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-4">
           {!isLogin && (
             <div>
-              <label htmlFor="gymName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="gymName" className="block text-sm font-medium mb-1" style={{ color: "var(--on-surface-variant)" }}>
                 Gym Name
               </label>
               <input
@@ -154,13 +155,13 @@ export default function AuthPage() {
                 value={gymName}
                 onChange={(e) => setGymName(e.target.value)}
                 placeholder="CrossFit Blaze Naples"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                className="ma-input"
               />
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: "var(--on-surface-variant)" }}>
               Email
             </label>
             <input
@@ -170,12 +171,12 @@ export default function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="owner@yourgym.com"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+              className="ma-input"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium mb-1" style={{ color: "var(--on-surface-variant)" }}>
               Password
             </label>
             <input
@@ -186,26 +187,26 @@ export default function AuthPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+              className="ma-input"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-600 text-white py-2.5 rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="ma-btn-primary w-full py-2.5"
           >
             {loading ? "Please wait..." : isLogin ? "Log In" : "Create Account"}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-500">
+        <div className="mt-6 text-center text-sm" style={{ color: "var(--on-surface-muted)" }}>
           {isLogin ? (
             <>
               Don&apos;t have an account?{" "}
               <button
                 onClick={() => { setIsLogin(false); setError(null); }}
-                className="text-red-600 font-medium hover:underline"
+                className="font-medium hover:underline" style={{ color: "var(--primary)" }}
               >
                 Sign up
               </button>
@@ -215,7 +216,7 @@ export default function AuthPage() {
               Already have an account?{" "}
               <button
                 onClick={() => { setIsLogin(true); setError(null); }}
-                className="text-red-600 font-medium hover:underline"
+                className="font-medium hover:underline" style={{ color: "var(--primary)" }}
               >
                 Log in
               </button>
