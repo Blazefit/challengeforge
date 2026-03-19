@@ -235,6 +235,8 @@ export default async function ParticipantDetail({
       <ActivityTimeline
         participantId={participant.id}
         tierName={(participant.tiers as { name: string } | null)?.name ?? "Unknown"}
+        challengeStartDate={(participant.challenges as { start_date: string } | null)?.start_date ?? ""}
+        challengeEndDate={(participant.challenges as { end_date: string } | null)?.end_date ?? ""}
         hasNutritionPlan={!!participant.ai_nutrition_plan}
         hasTrainingPlan={!!participant.ai_training_plan}
         hasMealPlan={!!participant.ai_meal_plan}

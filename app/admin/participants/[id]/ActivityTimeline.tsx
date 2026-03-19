@@ -13,6 +13,8 @@ interface Activity {
 interface Props {
   participantId: string;
   tierName: string;
+  challengeStartDate: string;
+  challengeEndDate: string;
   hasNutritionPlan: boolean;
   hasTrainingPlan: boolean;
   hasMealPlan: boolean;
@@ -32,10 +34,28 @@ interface ChecklistItem {
   key: string;
   label: string;
   category: "onboarding" | "plans" | "coaching" | "endgame";
-  tiers: string[]; // which tiers get this
+  tiers: string[];
   done: boolean;
-  doneAt?: string; // timestamp from activity log
+  doneAt?: string;
+  dueDate?: string; // when this should be done by
   description: string;
+}
+
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr + "T12:00:00");
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split("T")[0];
+}
+
+function formatShortDate(dateStr: string): string {
+  const d = new Date(dateStr + "T12:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function isOverdue(dueDate: string | undefined): boolean {
+  if (!dueDate) return false;
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  return dueDate < today;
 }
 
 function timeAgo(dateStr: string): string {
@@ -72,6 +92,8 @@ export default function ActivityTimeline({
   hasMealSubstitution,
   intakeComplete,
   totalCheckins,
+  challengeStartDate,
+  challengeEndDate,
 }: Props) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,30 +117,39 @@ export default function ActivityTimeline({
     if (!activityMap.has(a.type)) activityMap.set(a.type, a.created_at);
   });
 
+  // Calculate key dates from challenge
+  const week1 = challengeStartDate;
+  const week2 = addDays(challengeStartDate, 7);
+  const week4 = addDays(challengeStartDate, 21);
+  const week5 = addDays(challengeStartDate, 28);
+  const week6 = addDays(challengeStartDate, 35);
+  const preStart = addDays(challengeStartDate, -3);
+  const postEnd = addDays(challengeEndDate, 3);
+
   // Build checklist
   const allItems: ChecklistItem[] = [
     // Onboarding
     { key: "signup", label: "Participant Signed Up", category: "onboarding", tiers: ["all"], done: true, doneAt: activityMap.get("signup"), description: "Registration complete" },
-    { key: "welcome_email", label: "Welcome Email Sent", category: "onboarding", tiers: ["all"], done: !!activityMap.get("email_welcome"), doneAt: activityMap.get("email_welcome"), description: "Dashboard link + getting started info" },
-    { key: "intake", label: "Intake Form Completed", category: "onboarding", tiers: ["all"], done: intakeComplete, description: "Weight, age, sex, height + goals" },
-    { key: "first_checkin", label: "First Check-in Submitted", category: "onboarding", tiers: ["all"], done: totalCheckins > 0, description: "Participant has started checking in" },
+    { key: "welcome_email", label: "Welcome Email Sent", category: "onboarding", tiers: ["all"], done: !!activityMap.get("email_welcome"), doneAt: activityMap.get("email_welcome"), dueDate: preStart, description: "Dashboard link + getting started info" },
+    { key: "intake", label: "Intake Form Completed", category: "onboarding", tiers: ["all"], done: intakeComplete, dueDate: preStart, description: "Weight, age, sex, height + goals" },
+    { key: "first_checkin", label: "First Check-in Submitted", category: "onboarding", tiers: ["all"], done: totalCheckins > 0, dueDate: addDays(challengeStartDate, 1), description: "Participant has started checking in" },
 
     // AI Plans
-    { key: "nutrition_plan", label: "Nutrition Plan Generated", category: "plans", tiers: ["all"], done: hasNutritionPlan, doneAt: activityMap.get("ai_plan_generated"), description: "Macros, meal timing, calorie targets" },
-    { key: "training_plan", label: "Training Plan Generated", category: "plans", tiers: ["all"], done: hasTrainingPlan, doneAt: activityMap.get("ai_plan_generated"), description: "Weekly programming + Murph prep" },
-    { key: "workout_mod", label: "Workout Modifications", category: "plans", tiers: ["accelerator", "elite"], done: hasWorkoutMod, doneAt: activityMap.get("ai_workout_mod"), description: "Scaling, injury mods, progressions" },
-    { key: "meal_plan", label: "Custom 7-Day Meal Plan", category: "plans", tiers: ["elite"], done: hasMealPlan, doneAt: activityMap.get("ai_meal_plan"), description: "Full weekly meal plan with grocery list" },
-    { key: "supplements", label: "Supplement Recommendations", category: "plans", tiers: ["accelerator", "elite"], done: hasSupplements, doneAt: activityMap.get("ai_supplements"), description: "Evidence-based supplement stack" },
+    { key: "nutrition_plan", label: "Nutrition Plan Generated", category: "plans", tiers: ["all"], done: hasNutritionPlan, doneAt: activityMap.get("ai_plan_generated"), dueDate: week1, description: "Macros, meal timing, calorie targets" },
+    { key: "training_plan", label: "Training Plan Generated", category: "plans", tiers: ["all"], done: hasTrainingPlan, doneAt: activityMap.get("ai_plan_generated"), dueDate: week1, description: "Weekly programming + Murph prep" },
+    { key: "workout_mod", label: "Workout Modifications", category: "plans", tiers: ["accelerator", "elite"], done: hasWorkoutMod, doneAt: activityMap.get("ai_workout_mod"), dueDate: week1, description: "Scaling, injury mods, progressions" },
+    { key: "meal_plan", label: "Custom 7-Day Meal Plan", category: "plans", tiers: ["elite"], done: hasMealPlan, doneAt: activityMap.get("ai_meal_plan"), dueDate: week1, description: "Full weekly meal plan with grocery list" },
+    { key: "supplements", label: "Supplement Recommendations", category: "plans", tiers: ["accelerator", "elite"], done: hasSupplements, doneAt: activityMap.get("ai_supplements"), dueDate: week2, description: "Evidence-based supplement stack" },
 
     // Coaching
-    { key: "weekly_analysis", label: "Weekly Analysis Generated", category: "coaching", tiers: ["accelerator", "elite"], done: hasWeeklyAnalysis, doneAt: activityMap.get("ai_weekly_analysis"), description: "Performance review + next week focus" },
-    { key: "motivation", label: "Motivation Message Sent", category: "coaching", tiers: ["accelerator", "elite"], done: hasMotivation, doneAt: activityMap.get("ai_motivation"), description: "Personalized coaching message" },
-    { key: "meal_sub", label: "Meal Substitution Provided", category: "coaching", tiers: ["accelerator", "elite"], done: hasMealSubstitution, doneAt: activityMap.get("ai_meal_substitution"), description: "Quick swap alternatives" },
+    { key: "weekly_analysis", label: "Weekly Analysis (first)", category: "coaching", tiers: ["accelerator", "elite"], done: hasWeeklyAnalysis, doneAt: activityMap.get("ai_weekly_analysis"), dueDate: addDays(week2, 0), description: "Monday performance review + next week focus" },
+    { key: "motivation", label: "Motivation Message Sent", category: "coaching", tiers: ["accelerator", "elite"], done: hasMotivation, doneAt: activityMap.get("ai_motivation"), dueDate: week5, description: "Personalized message when energy dips" },
+    { key: "meal_sub", label: "Meal Substitution Provided", category: "coaching", tiers: ["accelerator", "elite"], done: hasMealSubstitution, doneAt: activityMap.get("ai_meal_substitution"), description: "As needed — quick swap alternatives" },
 
     // End of challenge
-    { key: "midprogram", label: "Mid-Program Adjustment (Week 4)", category: "endgame", tiers: ["accelerator", "elite"], done: hasMidprogram, doneAt: activityMap.get("ai_midprogram"), description: "Macro recalibration + training changes" },
-    { key: "murph_prep", label: "Murph Prep Strategy", category: "endgame", tiers: ["all"], done: hasMurphPrep, doneAt: activityMap.get("ai_murph_prep"), description: "Partition strategy + 2-week prep plan" },
-    { key: "post_program", label: "Post-Program Transition Plan", category: "endgame", tiers: ["all"], done: hasPostProgram, doneAt: activityMap.get("ai_post_program"), description: "Reverse diet + maintenance plan" },
+    { key: "midprogram", label: "Mid-Program Adjustment", category: "endgame", tiers: ["accelerator", "elite"], done: hasMidprogram, doneAt: activityMap.get("ai_midprogram"), dueDate: week4, description: "Week 4 — macro recalibration + training changes" },
+    { key: "murph_prep", label: "Murph Prep Strategy", category: "endgame", tiers: ["all"], done: hasMurphPrep, doneAt: activityMap.get("ai_murph_prep"), dueDate: week6, description: "Weeks 5-6 — partition strategy + prep plan" },
+    { key: "post_program", label: "Post-Program Transition Plan", category: "endgame", tiers: ["all"], done: hasPostProgram, doneAt: activityMap.get("ai_post_program"), dueDate: postEnd, description: "After Murph — reverse diet + maintenance plan" },
   ];
 
   // Filter to items relevant for this participant's tier
@@ -181,29 +212,41 @@ export default function ActivityTimeline({
                 </span>
                 <span className="text-[10px] text-gray-400">{catDone}/{catItems.length}</span>
               </div>
-              {catItems.map((item) => (
-                <div key={item.key} className={`px-6 py-3 flex items-start gap-3 ${item.done ? "" : "bg-yellow-50/30"}`}>
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                    item.done ? "bg-green-500 text-white" : "border-2 border-gray-300"
-                  }`}>
-                    {item.done && <span className="text-[10px]">&#10003;</span>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-sm ${item.done ? "text-gray-500" : "text-gray-900 font-medium"}`}>
-                        {item.label}
-                      </span>
-                      {item.done && item.doneAt && (
-                        <span className="text-[10px] text-gray-400">{timeAgo(item.doneAt)}</span>
-                      )}
-                      {!item.done && (
-                        <span className="text-[10px] text-yellow-600 font-medium">Pending</span>
-                      )}
+              {catItems.map((item) => {
+                const overdue = !item.done && isOverdue(item.dueDate);
+                return (
+                  <div key={item.key} className={`px-6 py-3 flex items-start gap-3 ${overdue ? "bg-red-50/50" : item.done ? "" : "bg-yellow-50/30"}`}>
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                      item.done ? "bg-green-500 text-white" : overdue ? "border-2 border-red-400 bg-red-100" : "border-2 border-gray-300"
+                    }`}>
+                      {item.done && <span className="text-[10px]">&#10003;</span>}
+                      {overdue && <span className="text-[10px] text-red-500">!</span>}
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">{item.description}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-sm ${item.done ? "text-gray-500" : overdue ? "text-red-700 font-medium" : "text-gray-900 font-medium"}`}>
+                          {item.label}
+                        </span>
+                        {item.done && item.doneAt && (
+                          <span className="text-[10px] text-green-600">Done {timeAgo(item.doneAt)}</span>
+                        )}
+                        {!item.done && overdue && (
+                          <span className="text-[10px] text-red-600 font-semibold">Overdue</span>
+                        )}
+                        {!item.done && !overdue && (
+                          <span className="text-[10px] text-yellow-600 font-medium">Pending</span>
+                        )}
+                        {item.dueDate && (
+                          <span className={`text-[10px] ${item.done ? "text-gray-300" : overdue ? "text-red-400" : "text-gray-400"}`}>
+                            {item.done ? "" : "Due "}{formatShortDate(item.dueDate)}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400 mt-0.5">{item.description}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           );
         })}
