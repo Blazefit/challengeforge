@@ -121,70 +121,74 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      {/* Hero Header */}
-      <div className="flex items-center justify-between mb-10">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-display text-4xl font-bold" style={{ color: "var(--on-surface)" }}>Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           {gym && (
-            <p className="mt-2 text-sm" style={{ color: "var(--on-surface-muted)" }}>Welcome back, {gym.name}</p>
+            <p className="text-gray-500 mt-1">Welcome back, {gym.name}</p>
           )}
         </div>
-        <Link href="/admin/challenges/new" className="ma-btn-primary">
+        <Link
+          href="/admin/challenges/new"
+          className="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
+        >
           + New Challenge
         </Link>
       </div>
 
       {!gym && (
-        <div className="ma-card mb-8" style={{ background: "var(--warning-container)" }}>
-          <h2 className="font-display font-semibold text-lg" style={{ color: "var(--warning)" }}>Complete Your Setup</h2>
-          <p className="text-sm mt-1 mb-4" style={{ color: "var(--on-surface-variant)" }}>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-6">
+          <h2 className="font-semibold text-yellow-800 mb-1">Complete Your Setup</h2>
+          <p className="text-yellow-700 text-sm mb-3">
             Finish setting up your gym profile to get started.
           </p>
-          <Link href="/admin/onboarding" className="ma-btn-primary">Complete Onboarding</Link>
+          <Link
+            href="/admin/onboarding"
+            className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors"
+          >
+            Complete Onboarding
+          </Link>
         </div>
       )}
 
       {/* Today's Stats */}
       {activeChallenge && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <div className="ma-card">
-            <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: "var(--on-surface-muted)" }}>Checked In</p>
-            <p className="font-display text-3xl font-bold" style={{ color: "var(--on-surface)" }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p className="text-sm text-gray-500 mb-1">Checked In Today</p>
+            <p className="text-3xl font-bold text-gray-900">
               {todayStats.checkedIn}
-              <span className="text-lg font-normal" style={{ color: "var(--on-surface-muted)" }}>/{todayStats.enrolled}</span>
+              <span className="text-lg font-normal text-gray-400">/{todayStats.enrolled}</span>
             </p>
-            <div className="ma-progress-track mt-3">
+            <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
               <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${todayStats.enrolled > 0 ? (todayStats.checkedIn / todayStats.enrolled) * 100 : 0}%`,
-                  background: todayStats.enrolled > 0 && todayStats.checkedIn === todayStats.enrolled ? "var(--success)" : "var(--tertiary)",
-                }}
+                className={`h-1.5 rounded-full ${todayStats.enrolled > 0 && todayStats.checkedIn === todayStats.enrolled ? "bg-green-500" : "bg-red-500"}`}
+                style={{ width: `${todayStats.enrolled > 0 ? (todayStats.checkedIn / todayStats.enrolled) * 100 : 0}%` }}
               />
             </div>
           </div>
-          <div className="ma-card">
-            <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: "var(--on-surface-muted)" }}>Enrolled</p>
-            <p className="font-display text-3xl font-bold" style={{ color: "var(--primary)" }}>{todayStats.enrolled}</p>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p className="text-sm text-gray-500 mb-1">Total Enrolled</p>
+            <p className="text-3xl font-bold text-gray-900">{todayStats.enrolled}</p>
           </div>
-          <div className="ma-card">
-            <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: "var(--on-surface-muted)" }}>Unpaid</p>
-            <p className="font-display text-3xl font-bold" style={{ color: todayStats.unpaid > 0 ? "var(--warning)" : "var(--success)" }}>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p className="text-sm text-gray-500 mb-1">Unpaid</p>
+            <p className={`text-3xl font-bold ${todayStats.unpaid > 0 ? "text-yellow-600" : "text-green-600"}`}>
               {todayStats.unpaid}
             </p>
           </div>
-          <div className="ma-card">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
             {countdownLabel ? (
               <>
-                <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: "var(--on-surface-muted)" }}>
+                <p className="text-sm text-gray-500 mb-1">
                   {countdownDays === 0 ? "Today!" : `Days ${countdownLabel}`}
                 </p>
-                <p className="font-display text-3xl font-bold" style={{ color: "var(--tertiary)" }}>{countdownDays}</p>
+                <p className="text-3xl font-bold text-red-600">{countdownDays}</p>
               </>
             ) : (
               <>
-                <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: "var(--on-surface-muted)" }}>Without Plans</p>
-                <p className="font-display text-3xl font-bold" style={{ color: todayStats.withoutPlans > 0 ? "var(--tertiary)" : "var(--success)" }}>
+                <p className="text-sm text-gray-500 mb-1">Without Plans</p>
+                <p className={`text-3xl font-bold ${todayStats.withoutPlans > 0 ? "text-orange-600" : "text-green-600"}`}>
                   {todayStats.withoutPlans}
                 </p>
               </>
@@ -196,22 +200,22 @@ export default async function AdminDashboard() {
       {/* Quick Actions */}
       {activeChallenge && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          {[
-            { href: "/admin/checkins", icon: "&#128203;", label: "Check-Ins" },
-            { href: "/admin/participants", icon: "&#128101;", label: "Participants" },
-            { href: "/admin/leaderboard", icon: "&#127942;", label: "Leaderboard" },
-            { href: "/admin/communications", icon: "&#128172;", label: "Comms" },
-          ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-center p-5 transition-all hover:scale-[1.02]"
-              style={{ background: "var(--surface-container-low)", borderRadius: "var(--radius-lg)" }}
-            >
-              <p className="text-2xl mb-2" dangerouslySetInnerHTML={{ __html: item.icon }} />
-              <p className="text-sm font-medium" style={{ color: "var(--on-surface-variant)" }}>{item.label}</p>
-            </Link>
-          ))}
+          <Link href="/admin/checkins" className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:bg-gray-50 transition-colors text-center">
+            <p className="text-2xl mb-1">&#128203;</p>
+            <p className="text-sm font-medium text-gray-900">Check-Ins</p>
+          </Link>
+          <Link href="/admin/participants" className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:bg-gray-50 transition-colors text-center">
+            <p className="text-2xl mb-1">&#128101;</p>
+            <p className="text-sm font-medium text-gray-900">Participants</p>
+          </Link>
+          <Link href="/admin/leaderboard" className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:bg-gray-50 transition-colors text-center">
+            <p className="text-2xl mb-1">&#127942;</p>
+            <p className="text-sm font-medium text-gray-900">Leaderboard</p>
+          </Link>
+          <Link href="/admin/communications" className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:bg-gray-50 transition-colors text-center">
+            <p className="text-2xl mb-1">&#128172;</p>
+            <p className="text-sm font-medium text-gray-900">Comms</p>
+          </Link>
         </div>
       )}
 
@@ -228,34 +232,37 @@ export default async function AdminDashboard() {
 
       {/* At-Risk Athletes */}
       {atRiskParticipants.length > 0 && (
-        <div className="mb-8" style={{ background: "var(--surface-container-high)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
-          <div className="px-6 py-4" style={{ background: "rgba(147, 0, 10, 0.2)" }}>
+        <div className="bg-white rounded-xl border border-red-200 shadow-sm mb-8">
+          <div className="px-6 py-4 border-b border-red-100 bg-red-50 rounded-t-xl">
             <div className="flex items-center gap-2">
               <span className="text-lg">&#9888;&#65039;</span>
-              <h2 className="font-display font-semibold" style={{ color: "var(--tertiary)" }}>
+              <h2 className="font-semibold text-red-800">
                 At-Risk Athletes ({atRiskParticipants.length})
               </h2>
             </div>
-            <p className="text-sm mt-1" style={{ color: "var(--on-surface-muted)" }}>
-              Haven&apos;t checked in for 2+ days
+            <p className="text-sm text-red-600 mt-1">
+              These participants haven&apos;t checked in for 2+ days
             </p>
           </div>
-          <div>
-            {atRiskParticipants.map((p, i) => (
-              <div key={p.id} className="px-6 py-3 flex items-center justify-between" style={{ borderTop: i > 0 ? "1px solid rgba(70, 69, 84, 0.15)" : "none" }}>
+          <div className="divide-y divide-gray-100">
+            {atRiskParticipants.map((p) => (
+              <div key={p.id} className="px-6 py-3 flex items-center justify-between">
                 <div>
-                  <Link href={`/admin/participants/${p.id}`} className="font-medium text-sm hover:underline" style={{ color: "var(--on-surface)" }}>
+                  <Link
+                    href={`/admin/participants/${p.id}`}
+                    className="font-medium text-gray-900 hover:text-red-600 transition-colors"
+                  >
                     {p.name}
                   </Link>
-                  <p className="text-xs" style={{ color: "var(--on-surface-muted)" }}>{p.trackName} &middot; {p.email}</p>
+                  <p className="text-xs text-gray-500">{p.trackName} &middot; {p.email}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="ma-badge" style={{ background: "rgba(147, 0, 10, 0.3)", color: "var(--tertiary)" }}>
-                    {p.daysMissed}+ days
+                  <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
+                    {p.daysMissed}+ days missed
                   </span>
                   <a
-                    href={`mailto:${p.email}?subject=Missing you at the challenge!&body=Hey ${p.name.split(" ")[0]},%0A%0AWe noticed you haven't checked in for a couple days. Everything okay?%0A%0ALet's get back at it!`}
-                    className="ma-btn-secondary text-xs py-1 px-3"
+                    href={`mailto:${p.email}?subject=Missing you at the challenge!&body=Hey ${p.name.split(" ")[0]},%0A%0AWe noticed you haven't checked in for a couple days. Everything okay? Remember, even a quick check-in keeps you accountable and on track.%0A%0ALet's get back at it!`}
+                    className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
                   >
                     Nudge
                   </a>
@@ -267,33 +274,44 @@ export default async function AdminDashboard() {
       )}
 
       {/* Challenges List */}
-      <div className="ma-card">
-        <h2 className="font-display font-semibold text-lg mb-5" style={{ color: "var(--on-surface)" }}>Your Challenges</h2>
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="font-semibold text-gray-800">Your Challenges</h2>
+        </div>
 
         {!challenges || challenges.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="mb-4" style={{ color: "var(--on-surface-muted)" }}>No challenges yet. Create your first one!</p>
-            <Link href="/admin/challenges/new" className="ma-btn-primary">Create Challenge</Link>
+          <div className="px-6 py-12 text-center">
+            <p className="text-gray-400 mb-4">No challenges yet. Create your first one!</p>
+            <Link
+              href="/admin/challenges/new"
+              className="inline-block bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
+            >
+              Create Challenge
+            </Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="divide-y divide-gray-100">
             {challenges.map((c) => (
               <Link
                 key={c.id}
                 href={`/admin/challenges/${c.id}`}
-                className="flex items-center justify-between p-4 transition-all hover:scale-[1.01]"
-                style={{ background: "var(--surface-container-low)", borderRadius: "var(--radius-md)" }}
+                className="block px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <div>
-                  <h3 className="font-medium text-sm" style={{ color: "var(--on-surface)" }}>{c.name}</h3>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--on-surface-muted)" }}>
+                  <h3 className="font-medium text-gray-900">{c.name}</h3>
+                  <p className="text-sm text-gray-500">
                     /c/{c.slug} &middot; {c.start_date} to {c.end_date}
                   </p>
                 </div>
-                <span className="ma-chip" style={{
-                  background: c.status === "active" ? "rgba(125, 220, 142, 0.15)" : c.status === "completed" ? "var(--surface-bright)" : "rgba(255, 212, 102, 0.15)",
-                  color: c.status === "active" ? "var(--success)" : c.status === "completed" ? "var(--on-surface-muted)" : "var(--warning)",
-                }}>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    c.status === "active"
+                      ? "bg-green-100 text-green-700"
+                      : c.status === "completed"
+                      ? "bg-gray-100 text-gray-600"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
                   {c.status}
                 </span>
               </Link>

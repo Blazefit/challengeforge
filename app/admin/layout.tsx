@@ -19,7 +19,7 @@ export default async function AdminLayout({
   // Get gym and active challenge
   const { data: gym } = await supabase
     .from("gyms")
-    .select("id")
+    .select("id, name")
     .eq("email", user.email ?? "")
     .single();
 
@@ -54,7 +54,6 @@ export default async function AdminLayout({
       badges.missingCheckins = active.filter(p => !checkedInIds.has(p.id)).length;
       badges.unpaid = active.filter(p => p.payment_status !== "paid").length;
 
-      // At-risk: fetch all checkins to find who hasn't checked in 2+ days
       const twoDaysAgo = new Date();
       twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
       const twoDaysAgoStr = twoDaysAgo.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
@@ -70,7 +69,6 @@ export default async function AdminLayout({
     }
   }
 
-  // Sign out action
   async function signOut() {
     "use server";
     const supabase = await createClient();
@@ -78,49 +76,70 @@ export default async function AdminLayout({
     redirect("/auth/signup");
   }
 
+  const navItems = [
+    { href: "/admin/dashboard", label: "Dashboard" },
+    { href: "/admin/participants", label: "Participants", badge: badges.unpaid > 0 ? badges.unpaid : null },
+    { href: "/admin/checkins", label: "Check-Ins", badge: badges.missingCheckins > 0 ? badges.missingCheckins : null },
+    { href: "/admin/leaderboard", label: "Leaderboard" },
+    { href: "/admin/communications", label: "Comms" },
+    { href: "/admin/marketing", label: "Marketing" },
+    { href: "/admin/reports", label: "Reports", badge: badges.atRisk > 0 ? badges.atRisk : null },
+    { href: "/admin/settings", label: "Settings" },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <Link href="/admin/dashboard" className="text-xl font-bold text-red-600">ChallengeForge</Link>
-          <div className="flex items-center gap-6 text-sm">
-            <Link href="/admin/dashboard" className="text-gray-700 hover:text-red-600">Dashboard</Link>
-            <Link href="/admin/challenges/new" className="text-gray-700 hover:text-red-600">New Challenge</Link>
-            <Link href="/admin/participants" className="text-gray-700 hover:text-red-600 flex items-center gap-1">
-              Participants
-              {badges.unpaid > 0 && (
-                <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {badges.unpaid}
+    <div className="min-h-screen" style={{ background: "var(--surface)" }}>
+      {/* Navigation */}
+      <nav className="ma-glass sticky top-0 z-50" style={{ borderBottom: "1px solid rgba(70, 69, 84, 0.15)" }}>
+        <div className="flex items-center justify-between max-w-[1400px] mx-auto px-6 py-3">
+          <div className="flex items-center gap-8">
+            <Link href="/admin/dashboard" className="flex items-center gap-2">
+              <span className="font-display text-lg font-bold" style={{ background: "var(--brand-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                ChallengeForge
+              </span>
+              {gym?.name && (
+                <span className="text-xs font-medium" style={{ color: "var(--on-surface-muted)" }}>
+                  {gym.name}
                 </span>
               )}
             </Link>
-            <Link href="/admin/leaderboard" className="text-gray-700 hover:text-red-600">Leaderboard</Link>
-            <Link href="/admin/checkins" className="text-gray-700 hover:text-red-600 flex items-center gap-1">
-              Check-Ins
-              {badges.missingCheckins > 0 && (
-                <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {badges.missingCheckins}
-                </span>
-              )}
-            </Link>
-            <Link href="/admin/communications" className="text-gray-700 hover:text-red-600">Comms</Link>
-            <Link href="/admin/reports" className="text-gray-700 hover:text-red-600 flex items-center gap-1">
-              Reports
-              {badges.atRisk > 0 && (
-                <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {badges.atRisk}
-                </span>
-              )}
-            </Link>
-            <Link href="/admin/marketing" className="text-gray-700 hover:text-red-600">Marketing</Link>
-            <Link href="/admin/settings" className="text-gray-700 hover:text-red-600">Settings</Link>
-            <form action={signOut}>
-              <button type="submit" className="text-gray-400 hover:text-red-600">Sign Out</button>
-            </form>
+
+            <div className="flex items-center gap-1">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="relative px-3 py-2 text-sm font-medium transition-colors hover:text-white"
+                  style={{ color: "var(--on-surface-variant)", borderRadius: "var(--radius-sm)" }}
+                >
+                  {item.label}
+                  {item.badge && (
+                    <span
+                      className="absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center text-[10px] font-bold text-white"
+                      style={{ background: "var(--tertiary-container)", borderRadius: "var(--radius-full)", fontSize: "0.6rem" }}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
           </div>
+
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="text-xs font-medium transition-colors hover:text-white"
+              style={{ color: "var(--on-surface-muted)" }}
+            >
+              Sign Out
+            </button>
+          </form>
         </div>
       </nav>
-      <main className="max-w-7xl mx-auto px-6 py-8">{children}</main>
+
+      {/* Main Content */}
+      <main className="max-w-[1400px] mx-auto px-6 py-8">{children}</main>
     </div>
   );
 }
