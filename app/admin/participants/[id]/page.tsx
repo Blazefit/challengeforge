@@ -231,8 +231,24 @@ export default async function ParticipantDetail({
         initialNotes={participant.coach_notes ?? ""}
       />
 
-      {/* Activity Timeline */}
-      <ActivityTimeline participantId={participant.id} />
+      {/* Coaching Checklist + Activity Timeline */}
+      <ActivityTimeline
+        participantId={participant.id}
+        tierName={(participant.tiers as { name: string } | null)?.name ?? "Unknown"}
+        hasNutritionPlan={!!participant.ai_nutrition_plan}
+        hasTrainingPlan={!!participant.ai_training_plan}
+        hasMealPlan={!!participant.ai_meal_plan}
+        hasWorkoutMod={!!participant.ai_workout_mod}
+        hasWeeklyAnalysis={!!participant.ai_weekly_analysis}
+        hasMidprogram={!!participant.ai_midprogram_adjustment}
+        hasMurphPrep={!!participant.ai_murph_prep}
+        hasMotivation={!!participant.ai_motivation}
+        hasSupplements={!!participant.ai_supplements}
+        hasPostProgram={!!participant.ai_post_program}
+        hasMealSubstitution={!!participant.ai_meal_substitution}
+        intakeComplete={!!(intake?.weight && intake?.age && (intake?.sex ?? intake?.gender) && intake?.height)}
+        totalCheckins={allCheckins.length}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Contact Info */}
